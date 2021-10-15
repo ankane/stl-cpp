@@ -1,0 +1,9 @@
+name: build
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: g++ -std=c++17 -o test/main test/main.cpp
+    - run: test/main
