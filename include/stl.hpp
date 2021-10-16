@@ -269,15 +269,6 @@ void onestp(const float* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl
 }
 
 void stl(const float* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int isdeg, int itdeg, int ildeg, size_t nsjump, size_t ntjump, size_t nljump, size_t ni, size_t no, float* rw, float* season, float* trend) {
-    auto work1 = std::vector<float>(n + 2 * np);
-    auto work2 = std::vector<float>(n + 2 * np);
-    auto work3 = std::vector<float>(n + 2 * np);
-    auto work4 = std::vector<float>(n + 2 * np);
-    auto work5 = std::vector<float>(n + 2 * np);
-
-    auto userw = false;
-    auto k = 0;
-
     if (ns < 3) {
         throw std::invalid_argument("seasonal_length must be at least 3");
     }
@@ -310,6 +301,15 @@ void stl(const float* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, i
     if (nl % 2 != 1) {
         throw std::invalid_argument("low_pass_length must be odd");
     }
+
+    auto work1 = std::vector<float>(n + 2 * np);
+    auto work2 = std::vector<float>(n + 2 * np);
+    auto work3 = std::vector<float>(n + 2 * np);
+    auto work4 = std::vector<float>(n + 2 * np);
+    auto work5 = std::vector<float>(n + 2 * np);
+
+    auto userw = false;
+    auto k = 0;
 
     while (true) {
         onestp(y, n, np, ns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, userw, rw, season, trend, work1.data(), work2.data(), work3.data(), work4.data(), work5.data());
