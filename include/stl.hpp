@@ -403,6 +403,8 @@ StlParams params() {
 }
 
 StlResult StlParams::fit(const float* y, size_t n, size_t np) {
+    assert(n >= 2 * np);
+
     auto ns = this->ns_.value_or(np);
 
     auto isdeg = this->isdeg_;
