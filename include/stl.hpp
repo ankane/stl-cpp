@@ -13,9 +13,9 @@
 #pragma once
 
 #include <algorithm>
-#include <cassert>
 #include <cmath>
 #include <optional>
+#include <stdexcept>
 #include <vector>
 
 namespace stl {
@@ -278,18 +278,38 @@ void stl(const float* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, i
     auto userw = false;
     auto k = 0;
 
-    assert(ns >= 3);
-    assert(nt >= 3);
-    assert(nl >= 3);
-    assert(np >= 2);
+    if (ns < 3) {
+        throw std::invalid_argument("seasonal_length must be at least 3");
+    }
+    if (nt < 3) {
+        throw std::invalid_argument("trend_length must be at least 3");
+    }
+    if (nl < 3) {
+        throw std::invalid_argument("low_pass_length must be at least 3");
+    }
+    if (np < 2) {
+        throw std::invalid_argument("period must be at least 2");
+    }
 
-    assert(isdeg == 0 || isdeg == 1);
-    assert(itdeg == 0 || itdeg == 1);
-    assert(ildeg == 0 || ildeg == 1);
+    if (isdeg != 0 && isdeg != 1) {
+        throw std::invalid_argument("seasonal_degree must be 0 or 1");
+    }
+    if (itdeg != 0 && itdeg != 1) {
+        throw std::invalid_argument("trend_degree must be 0 or 1");
+    }
+    if (ildeg != 0 && ildeg != 1) {
+        throw std::invalid_argument("low_pass_degree must be 0 or 1");
+    }
 
-    assert(ns % 2 == 1);
-    assert(nt % 2 == 1);
-    assert(nl % 2 == 1);
+    if (ns % 2 != 1) {
+        throw std::invalid_argument("seasonal_length must be odd");
+    }
+    if (nt % 2 != 1) {
+        throw std::invalid_argument("trend_length must be odd");
+    }
+    if (nl % 2 != 1) {
+        throw std::invalid_argument("low_pass_length must be odd");
+    }
 
     while (true) {
         onestp(y, n, np, ns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, userw, rw, season, trend, work1.data(), work2.data(), work3.data(), work4.data(), work5.data());
@@ -403,7 +423,9 @@ StlParams params() {
 }
 
 StlResult StlParams::fit(const float* y, size_t n, size_t np) {
-    assert(n >= 2 * np);
+    if (n < 2 * np) {
+        throw std::invalid_argument("series has less than two periods");
+    }
 
     auto ns = this->ns_.value_or(np);
 

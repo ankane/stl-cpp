@@ -1,6 +1,6 @@
 ## 0.1.1 (unreleased)
 
-- Added check for at least two periods
+- Switched from assertions to exceptions
 
 ## 0.1.0 (2021-10-15)
 

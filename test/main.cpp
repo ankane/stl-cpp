@@ -1,7 +1,17 @@
+#include <cassert>
 #include <iostream>
 #include <vector>
 
 #include "../include/stl.hpp"
+
+#define ASSERT_EXCEPTION(code, type, message) { \
+    try {                                       \
+        code;                                   \
+        assert(false);                          \
+    } catch (const type &e) {                   \
+        assert(strcmp(e.what(), message) == 0); \
+    }                                           \
+}
 
 void print_vector(const std::vector<float>& x) {
     for (auto v : x) {
@@ -49,8 +59,26 @@ void test_robust() {
     assert_elements_in_delta({0.99374926, 0.8129377, 0.9385952, 0.9458036, 0.29742217}, first(result.weights, 5));
 }
 
+void test_too_few_periods() {
+    ASSERT_EXCEPTION(
+        stl::params().fit(generate_series(), 16),
+        std::invalid_argument,
+        "series has less than two periods"
+    );
+}
+
+void test_bad_seasonal_degree() {
+    ASSERT_EXCEPTION(
+        stl::params().seasonal_degree(2).fit(generate_series(), 7),
+        std::invalid_argument,
+        "seasonal_degree must be 0 or 1"
+    );
+}
+
 int main() {
     test_works();
     test_robust();
+    test_too_few_periods();
+    test_bad_seasonal_degree();
     return 0;
 }
