@@ -45,7 +45,7 @@ auto res = stl::params().robust(true).fit(series, period);
 
 Get robustness weights
 
-```rust
+```cpp
 res.weights;
 ```
 
@@ -53,7 +53,7 @@ res.weights;
 
 Set parameters
 
-```rust
+```cpp
 stl::params()
     .seasonal_length(7)     // length of the seasonal smoother
     .trend_length(15)       // length of the trend smoother
@@ -73,13 +73,13 @@ stl::params()
 
 Get the seasonal strength
 
-```rust
+```cpp
 res.seasonal_strength();
 ```
 
 Get the trend strength
 
-```rust
+```cpp
 res.trend_strength();
 ```
 
