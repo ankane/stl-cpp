@@ -26,10 +26,14 @@ std::vector<float> first(const std::vector<float>& x, size_t n) {
     return std::vector<float>(x.begin(), x.begin() + n);
 }
 
+void assert_in_delta(float exp, float act) {
+    assert(fabs(exp - act) < 0.001);
+}
+
 void assert_elements_in_delta(const std::vector<float>& exp, const std::vector<float>& act) {
     assert(exp.size() == act.size());
     for (auto i = 0; i < exp.size(); i++) {
-        assert(fabs(exp[i] - act[i]) < 0.001);
+        assert_in_delta(exp[i], act[i]);
     }
 }
 
@@ -76,10 +80,22 @@ void test_bad_seasonal_degree() {
     );
 }
 
+void test_seasonal_strength() {
+    auto result = stl::params().fit(generate_series(), 7);
+    assert_in_delta(0.284111676315015, result.seasonal_strength());
+}
+
+void test_trend_strength() {
+    auto result = stl::params().fit(generate_series(), 7);
+    assert_in_delta(0.16384245231864702, result.trend_strength());
+}
+
 int main() {
     test_works();
     test_robust();
     test_too_few_periods();
     test_bad_seasonal_degree();
+    test_seasonal_strength();
+    test_trend_strength();
     return 0;
 }

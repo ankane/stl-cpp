@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 #include <optional>
 #include <stdexcept>
 #include <vector>
@@ -331,12 +332,40 @@ void stl(const float* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, i
     }
 }
 
+float var(const std::vector<float>& series) {
+    auto mean = std::accumulate(series.begin(), series.end(), 0.0) / series.size();
+    std::vector<float> tmp;
+    tmp.reserve(series.size());
+    for (auto v : series) {
+        tmp.push_back(pow(v - mean, 2));
+    }
+    return std::accumulate(tmp.begin(), tmp.end(), 0.0) / (series.size() - 1);
+}
+
 class StlResult {
 public:
     std::vector<float> seasonal;
     std::vector<float> trend;
     std::vector<float> remainder;
     std::vector<float> weights;
+
+    inline float seasonal_strength() {
+        std::vector<float> sr;
+        sr.reserve(remainder.size());
+        for (auto i = 0; i < remainder.size(); i++) {
+            sr.push_back(seasonal[i] + remainder[i]);
+        }
+        return std::max(0.0, 1.0 - var(remainder) / var(sr));
+    }
+
+    inline float trend_strength() {
+        std::vector<float> tr;
+        tr.reserve(remainder.size());
+        for (auto i = 0; i < remainder.size(); i++) {
+            tr.push_back(trend[i] + remainder[i]);
+        }
+        return std::max(0.0, 1.0 - var(remainder) / var(tr));
+    }
 };
 
 class StlParams {
