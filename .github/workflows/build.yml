@@ -11,3 +11,10 @@ jobs:
     - uses: actions/checkout@v2
     - run: g++ -std=c++17 -o test/main test/main.cpp
     - run: test/main
+
+    - if: ${{ startsWith(matrix.os, 'windows') }}
+      run: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        cl /W3 /EHsc /std:c++17 test/main.cpp /link /out:test/main-msvc.exe
+        test/main-msvc
+      shell: cmd
