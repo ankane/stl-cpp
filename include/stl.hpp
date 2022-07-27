@@ -386,62 +386,62 @@ public:
     inline StlParams seasonal_length(size_t ns) {
         this->ns_ = ns;
         return *this;
-    };
+    }
 
     inline StlParams trend_length(size_t nt) {
         this->nt_ = nt;
         return *this;
-    };
+    }
 
     inline StlParams low_pass_length(size_t nl) {
         this->nl_ = nl;
         return *this;
-    };
+    }
 
     inline StlParams seasonal_degree(int isdeg) {
         this->isdeg_ = isdeg;
         return *this;
-    };
+    }
 
     inline StlParams trend_degree(int itdeg) {
         this->itdeg_ = itdeg;
         return *this;
-    };
+    }
 
     inline StlParams low_pass_degree(int ildeg) {
         this->ildeg_ = ildeg;
         return *this;
-    };
+    }
 
     inline StlParams seasonal_jump(size_t nsjump) {
         this->nsjump_ = nsjump;
         return *this;
-    };
+    }
 
     inline StlParams trend_jump(size_t ntjump) {
         this->ntjump_ = ntjump;
         return *this;
-    };
+    }
 
     inline StlParams low_pass_jump(size_t nljump) {
         this->nljump_ = nljump;
         return *this;
-    };
+    }
 
     inline StlParams inner_loops(bool ni) {
         this->ni_ = ni;
         return *this;
-    };
+    }
 
     inline StlParams outer_loops(bool no) {
         this->no_ = no;
         return *this;
-    };
+    }
 
     inline StlParams robust(bool robust) {
         this->robust_ = robust;
         return *this;
-    };
+    }
 
     StlResult fit(const float* y, size_t n, size_t np);
     StlResult fit(const std::vector<float>& y, size_t np);
