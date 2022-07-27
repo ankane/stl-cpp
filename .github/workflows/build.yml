@@ -16,5 +16,5 @@ jobs:
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cl /W3 /EHsc /std:c++17 test/main.cpp /link /out:test/main-msvc.exe
-        test/main-msvc
+        call "test/main-msvc.exe"
       shell: cmd
