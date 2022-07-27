@@ -32,7 +32,7 @@ void assert_in_delta(float exp, float act) {
 
 void assert_elements_in_delta(const std::vector<float>& exp, const std::vector<float>& act) {
     assert(exp.size() == act.size());
-    for (auto i = 0; i < exp.size(); i++) {
+    for (size_t i = 0; i < exp.size(); i++) {
         assert_in_delta(exp[i], act[i]);
     }
 }

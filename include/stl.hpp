@@ -92,14 +92,14 @@ void ess(const float* y, size_t n, size_t len, int ideg, size_t njump, bool user
         return;
     }
 
-    auto nleft = 0;
-    auto nright = 0;
+    size_t nleft = 0;
+    size_t nright = 0;
 
     auto newnj = std::min(njump, n - 1);
     if (len >= n) {
         nleft = 1;
         nright = n;
-        for (auto i = 1; i <= n; i += newnj) {
+        for (size_t i = 1; i <= n; i += newnj) {
             auto ok = est(y, n, len, ideg, (float) i, &ys[i - 1], nleft, nright, res, userw, rw);
             if (!ok) {
                 ys[i - 1] = y[i - 1];
@@ -109,7 +109,7 @@ void ess(const float* y, size_t n, size_t len, int ideg, size_t njump, bool user
         auto nsh = (len + 1) / 2;
         nleft = 1;
         nright = len;
-        for (auto i = 1; i <= n; i++) { // fitted value at i
+        for (size_t i = 1; i <= n; i++) { // fitted value at i
             if (i > nsh && nright != n) {
                 nleft += 1;
                 nright += 1;
@@ -121,7 +121,7 @@ void ess(const float* y, size_t n, size_t len, int ideg, size_t njump, bool user
         }
     } else { // newnj greater than one, len less than n
         auto nsh = (len + 1) / 2;
-        for (auto i = 1; i <= n; i += newnj) { // fitted value at i
+        for (size_t i = 1; i <= n; i += newnj) { // fitted value at i
             if (i < nsh) {
                 nleft = 1;
                 nright = len;
@@ -140,7 +140,7 @@ void ess(const float* y, size_t n, size_t len, int ideg, size_t njump, bool user
     }
 
     if (newnj != 1) {
-        for (auto i = 1; i <= n - newnj; i += newnj) {
+        for (size_t i = 1; i <= n - newnj; i += newnj) {
             auto delta = (ys[i + newnj - 1] - ys[i - 1]) / ((float) newnj);
             for (auto j = i + 1; j <= i + newnj - 1; j++) {
                 ys[j - 1] = ys[i - 1] + delta * ((float) (j - i));
@@ -168,7 +168,7 @@ void ma(const float* x, size_t n, size_t len, float* ave) {
     auto v = 0.0;
 
     // get the first average
-    for (auto i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
         v += x[i];
     }
 
@@ -176,7 +176,7 @@ void ma(const float* x, size_t n, size_t len, float* ave) {
     if (newn > 1) {
         auto k = len;
         auto m = 0;
-        for (auto j = 1; j < newn; j++) {
+        for (size_t j = 1; j < newn; j++) {
             // window down the array
             v = v - x[m] + x[k];
             ave[j] = v / flen;
@@ -193,7 +193,7 @@ void fts(const float* x, size_t n, size_t np, float* trend, float* work) {
 }
 
 void rwts(const float* y, size_t n, const float* fit, float* rw) {
-    for (auto i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         rw[i] = fabs(y[i] - fit[i]);
     }
 
@@ -207,7 +207,7 @@ void rwts(const float* y, size_t n, const float* fit, float* rw) {
     auto c9 = 0.999 * cmad;
     auto c1 = 0.001 * cmad;
 
-    for (auto i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         auto r = fabs(y[i] - fit[i]);
         if (r <= c1) {
             rw[i] = 1.0;
@@ -220,14 +220,14 @@ void rwts(const float* y, size_t n, const float* fit, float* rw) {
 }
 
 void ss(const float* y, size_t n, size_t np, size_t ns, int isdeg, size_t nsjump, bool userw, float* rw, float* season, float* work1, float* work2, float* work3, float* work4) {
-    for (auto j = 1; j <= np; j++) {
-        auto k = (n - j) / np + 1;
+    for (size_t j = 1; j <= np; j++) {
+        size_t k = (n - j) / np + 1;
 
-        for (auto i = 1; i <= k; i++) {
+        for (size_t i = 1; i <= k; i++) {
             work1[i - 1] = y[(i - 1) * np + j - 1];
         }
         if (userw) {
-            for (auto i = 1; i <= k; i++) {
+            for (size_t i = 1; i <= k; i++) {
                 work3[i - 1] = rw[(i - 1) * np + j - 1];
             }
         }
@@ -244,25 +244,25 @@ void ss(const float* y, size_t n, size_t np, size_t ns, int isdeg, size_t nsjump
         if (!ok) {
             work2[k + 1] = work2[k];
         }
-        for (auto m = 1; m <= k + 2; m++) {
+        for (size_t m = 1; m <= k + 2; m++) {
             season[(m - 1) * np + j - 1] = work2[m - 1];
         }
     }
 }
 
 void onestp(const float* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int isdeg, int itdeg, int ildeg, size_t nsjump, size_t ntjump, size_t nljump, size_t ni, bool userw, float* rw, float* season, float* trend, float* work1, float* work2, float* work3, float* work4, float* work5) {
-    for (auto j = 0; j < ni; j++) {
-        for (auto i = 0; i < n; i++) {
+    for (size_t j = 0; j < ni; j++) {
+        for (size_t i = 0; i < n; i++) {
             work1[i] = y[i] - trend[i];
         }
 
         ss(work1, n, np, ns, isdeg, nsjump, userw, rw, work2, work3, work4, work5, season);
         fts(work2, n + 2 * np, np, work3, work1);
         ess(work3, n, nl, ildeg, nljump, false, work4, work1, work5);
-        for (auto i = 0; i < n; i++) {
+        for (size_t i = 0; i < n; i++) {
             season[i] = work2[np + i] - work1[i];
         }
-        for (auto i = 0; i < n; i++) {
+        for (size_t i = 0; i < n; i++) {
             work1[i] = y[i] - season[i];
         }
         ess(work1, n, nt, itdeg, ntjump, userw, rw, trend, work3);
@@ -310,7 +310,7 @@ void stl(const float* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, i
     auto work5 = std::vector<float>(n + 2 * np);
 
     auto userw = false;
-    auto k = 0;
+    size_t k = 0;
 
     while (true) {
         onestp(y, n, np, ns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, userw, rw, season, trend, work1.data(), work2.data(), work3.data(), work4.data(), work5.data());
@@ -318,7 +318,7 @@ void stl(const float* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, i
         if (k > no) {
             break;
         }
-        for (auto i = 0; i < n; i++) {
+        for (size_t i = 0; i < n; i++) {
             work1[i] = trend[i] + season[i];
         }
         rwts(y, n, work1.data(), rw);
@@ -326,7 +326,7 @@ void stl(const float* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, i
     }
 
     if (no <= 0) {
-        for (auto i = 0; i < n; i++) {
+        for (size_t i = 0; i < n; i++) {
             rw[i] = 1.0;
         }
     }
@@ -352,7 +352,7 @@ public:
     inline float seasonal_strength() {
         std::vector<float> sr;
         sr.reserve(remainder.size());
-        for (auto i = 0; i < remainder.size(); i++) {
+        for (size_t i = 0; i < remainder.size(); i++) {
             sr.push_back(seasonal[i] + remainder[i]);
         }
         return std::max(0.0, 1.0 - var(remainder) / var(sr));
@@ -361,7 +361,7 @@ public:
     inline float trend_strength() {
         std::vector<float> tr;
         tr.reserve(remainder.size());
-        for (auto i = 0; i < remainder.size(); i++) {
+        for (size_t i = 0; i < remainder.size(); i++) {
             tr.push_back(trend[i] + remainder[i]);
         }
         return std::max(0.0, 1.0 - var(remainder) / var(tr));
@@ -497,7 +497,7 @@ StlResult StlParams::fit(const float* y, size_t n, size_t np) {
     stl(y, n, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, res.weights.data(), res.seasonal.data(), res.trend.data());
 
     res.remainder.reserve(n);
-    for (auto i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         res.remainder.push_back(y[i] - res.seasonal[i] - res.trend[i]);
     }
 
