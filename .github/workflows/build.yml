@@ -12,6 +12,9 @@ jobs:
     - run: g++ -std=c++17 -Wall -Wextra -Werror -o test/main test/main.cpp
     - run: test/main
 
+    - run: g++ -std=c++17 -Wall -Wextra -Werror -Iinclude -o example/main example/main.cpp
+    - run: example/main
+
     - if: ${{ startsWith(matrix.os, 'windows') }}
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
