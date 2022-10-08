@@ -6,7 +6,7 @@ Seasonal-trend decomposition for C++
 
 ## Installation
 
-Add [the header](https://raw.githubusercontent.com/ankane/stl-cpp/v0.1.1/include/stl.hpp) to your project and include it
+Add [the header](https://raw.githubusercontent.com/ankane/stl-cpp/v0.1.2/include/stl.hpp) to your project and include it
 
 ```cpp
 #include "stl.hpp"
