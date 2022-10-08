@@ -1,3 +1,7 @@
+## 0.1.2 (unreleased)
+
+- Fixed warnings
+
 ## 0.1.1 (2021-10-25)
 
 - Added `seasonal_strength` and `trend_strength` functions
