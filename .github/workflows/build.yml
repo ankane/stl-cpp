@@ -8,16 +8,17 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-2019]
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
-    - run: g++ -std=c++17 -Wall -Wextra -Werror -o test/main test/main.cpp
-    - run: test/main
+      - uses: actions/checkout@v3
 
-    - run: g++ -std=c++17 -Wall -Wextra -Werror -Iinclude -o example/main example/main.cpp
-    - run: example/main
+      - run: g++ -std=c++17 -Wall -Wextra -Werror -o test/main test/main.cpp
+      - run: test/main
 
-    - if: ${{ startsWith(matrix.os, 'windows') }}
-      run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-        cl /W3 /EHsc /std:c++17 test/main.cpp /link /out:test/main-msvc.exe
-        call "test/main-msvc.exe"
-      shell: cmd
+      - run: g++ -std=c++17 -Wall -Wextra -Werror -Iinclude -o example/main example/main.cpp
+      - run: example/main
+
+      - if: ${{ startsWith(matrix.os, 'windows') }}
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          cl /W3 /EHsc /std:c++17 test/main.cpp /link /out:test/main-msvc.exe
+          call "test/main-msvc.exe"
+        shell: cmd
