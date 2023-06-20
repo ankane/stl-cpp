@@ -1,3 +1,7 @@
+## 0.1.3 (unreleased)
+
+- Fixed bug when jump > 1
+
 ## 0.1.2 (2022-10-08)
 
 - Fixed warnings
