@@ -1,4 +1,4 @@
-## 0.1.3 (unreleased)
+## 0.1.3 (2023-06-20)
 
 - Fixed bug when jump > 1
 
