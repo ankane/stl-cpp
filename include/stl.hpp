@@ -342,6 +342,15 @@ float var(const std::vector<float>& series) {
     return std::accumulate(tmp.begin(), tmp.end(), 0.0) / (series.size() - 1);
 }
 
+float strength(const std::vector<float>& component, const std::vector<float>& remainder) {
+    std::vector<float> sr;
+    sr.reserve(remainder.size());
+    for (size_t i = 0; i < remainder.size(); i++) {
+        sr.push_back(component[i] + remainder[i]);
+    }
+    return std::max(0.0, 1.0 - var(remainder) / var(sr));
+}
+
 class StlResult {
 public:
     std::vector<float> seasonal;
@@ -350,21 +359,11 @@ public:
     std::vector<float> weights;
 
     inline float seasonal_strength() {
-        std::vector<float> sr;
-        sr.reserve(remainder.size());
-        for (size_t i = 0; i < remainder.size(); i++) {
-            sr.push_back(seasonal[i] + remainder[i]);
-        }
-        return std::max(0.0, 1.0 - var(remainder) / var(sr));
+        return strength(seasonal, remainder);
     }
 
     inline float trend_strength() {
-        std::vector<float> tr;
-        tr.reserve(remainder.size());
-        for (size_t i = 0; i < remainder.size(); i++) {
-            tr.push_back(trend[i] + remainder[i]);
-        }
-        return std::max(0.0, 1.0 - var(remainder) / var(tr));
+        return strength(trend, remainder);
     }
 };
 
