@@ -427,12 +427,12 @@ public:
         return *this;
     }
 
-    inline StlParams inner_loops(bool ni) {
+    inline StlParams inner_loops(size_t ni) {
         this->ni_ = ni;
         return *this;
     }
 
-    inline StlParams outer_loops(bool no) {
+    inline StlParams outer_loops(size_t no) {
         this->no_ = no;
         return *this;
     }
