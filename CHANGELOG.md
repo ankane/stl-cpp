@@ -1,3 +1,7 @@
+## 0.1.4 (unreleased)
+
+- Fixed bug with `inner_loops` and `outer_loops`
+
 ## 0.1.3 (2023-06-20)
 
 - Fixed bug when jump > 1
