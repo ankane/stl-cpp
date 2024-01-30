@@ -361,7 +361,7 @@ T strength(const std::vector<T>& component, const std::vector<T>& remainder) {
     return std::max(0.0, 1.0 - var(remainder) / var(sr));
 }
 
-template <class T>
+template <typename T>
 class StlResult {
 public:
     std::vector<T> seasonal;
@@ -378,7 +378,7 @@ public:
     }
 };
 
-template <class T = float>
+template <typename T = float>
 class StlParams {
     std::optional<size_t> ns_ = std::nullopt;
     std::optional<size_t> nt_ = std::nullopt;
