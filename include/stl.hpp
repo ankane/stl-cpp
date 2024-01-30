@@ -378,7 +378,6 @@ public:
     }
 };
 
-template <class T>
 class StlParams {
     std::optional<size_t> ns_ = std::nullopt;
     std::optional<size_t> nt_ = std::nullopt;
@@ -454,25 +453,26 @@ public:
         return *this;
     }
 
-    StlResult<T> fit(const T* y, size_t n, size_t np);
-    StlResult<T> fit(const std::vector<T>& y, size_t np);
+    StlResult<float> fit(const float* y, size_t n, size_t np);
+    StlResult<double> fit(const double* y, size_t n, size_t np);
+    StlResult<float> fit(const std::vector<float>& y, size_t np);
+    StlResult<double> fit(const std::vector<double>& y, size_t np);
 };
 
-template <typename T>
-StlParams<T> params() {
-    return StlParams<T>();
+StlParams params() {
+    return StlParams();
 }
 
 template <typename T>
-StlResult<T> StlParams<T>::fit(const T* y, size_t n, size_t np) {
+StlResult<T> stl_fit(const T* y, size_t n, size_t np, std::optional<size_t> ns_, std::optional<size_t> nt_, std::optional<size_t> nl_, int isdeg_, int itdeg_, std::optional<int> ildeg_, std::optional<size_t> nsjump_, std::optional<size_t> ntjump_, std::optional<size_t> nljump_, std::optional<size_t> ni_, std::optional<size_t> no_, bool robust_) {
     if (n < 2 * np) {
         throw std::invalid_argument("series has less than two periods");
     }
 
-    auto ns = this->ns_.value_or(np);
+    auto ns = ns_.value_or(np);
 
-    auto isdeg = this->isdeg_;
-    auto itdeg = this->itdeg_;
+    auto isdeg = isdeg_;
+    auto itdeg = itdeg_;
 
     auto res = StlResult<T> {
         std::vector<T>(n),
@@ -481,7 +481,7 @@ StlResult<T> StlParams<T>::fit(const T* y, size_t n, size_t np) {
         std::vector<T>(n)
     };
 
-    auto ildeg = this->ildeg_.value_or(itdeg);
+    auto ildeg = ildeg_.value_or(itdeg);
     auto newns = std::max(ns, (size_t) 3);
     if (newns % 2 == 0) {
         newns += 1;
@@ -489,23 +489,23 @@ StlResult<T> StlParams<T>::fit(const T* y, size_t n, size_t np) {
 
     auto newnp = std::max(np, (size_t) 2);
     auto nt = (size_t) ceil((1.5 * newnp) / (1.0 - 1.5 / (T) newns));
-    nt = this->nt_.value_or(nt);
+    nt = nt_.value_or(nt);
     nt = std::max(nt, (size_t) 3);
     if (nt % 2 == 0) {
         nt += 1;
     }
 
-    auto nl = this->nl_.value_or(newnp);
-    if (nl % 2 == 0 && !this->nl_.has_value()) {
+    auto nl = nl_.value_or(newnp);
+    if (nl % 2 == 0 && !nl_.has_value()) {
         nl += 1;
     }
 
-    auto ni = this->ni_.value_or(this->robust_ ? 1 : 2);
-    auto no = this->no_.value_or(this->robust_ ? 15 : 0);
+    auto ni = ni_.value_or(robust_ ? 1 : 2);
+    auto no = no_.value_or(robust_ ? 15 : 0);
 
-    auto nsjump = this->nsjump_.value_or((size_t) ceil(((T) newns) / 10.0));
-    auto ntjump = this->ntjump_.value_or((size_t) ceil(((T) nt) / 10.0));
-    auto nljump = this->nljump_.value_or((size_t) ceil(((T) nl) / 10.0));
+    auto nsjump = nsjump_.value_or((size_t) ceil(((T) newns) / 10.0));
+    auto ntjump = ntjump_.value_or((size_t) ceil(((T) nt) / 10.0));
+    auto nljump = nljump_.value_or((size_t) ceil(((T) nl) / 10.0));
 
     stl(y, n, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, res.weights.data(), res.seasonal.data(), res.trend.data());
 
@@ -517,9 +517,17 @@ StlResult<T> StlParams<T>::fit(const T* y, size_t n, size_t np) {
     return res;
 }
 
-template <typename T>
-StlResult<T> StlParams<T>::fit(const std::vector<T>& y, size_t np) {
-    return StlParams<T>::fit(y.data(), y.size(), np);
+StlResult<float> StlParams::fit(const float* y, size_t n, size_t np) {
+    return stl_fit(y, n, np, ns_, nt_, nl_, isdeg_, itdeg_, ildeg_, nsjump_, ntjump_, nljump_, ni_, no_, robust_);
+}
+StlResult<double> StlParams::fit(const double* y, size_t n, size_t np) {
+    return stl_fit(y, n, np, ns_, nt_, nl_, isdeg_, itdeg_, ildeg_, nsjump_, ntjump_, nljump_, ni_, no_, robust_);
+}
+StlResult<float> StlParams::fit(const std::vector<float>& y, size_t np) {
+    return stl_fit(y.data(), y.size(), np, ns_, nt_, nl_, isdeg_, itdeg_, ildeg_, nsjump_, ntjump_, nljump_, ni_, no_, robust_);
+}
+StlResult<double> StlParams::fit(const std::vector<double>& y, size_t np) {
+    return stl_fit(y.data(), y.size(), np, ns_, nt_, nl_, isdeg_, itdeg_, ildeg_, nsjump_, ntjump_, nljump_, ni_, no_, robust_);
 }
 
 }
