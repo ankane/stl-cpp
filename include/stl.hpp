@@ -378,7 +378,7 @@ public:
     }
 };
 
-template <class T>
+template <class T = float>
 class StlParams {
     std::optional<size_t> ns_ = std::nullopt;
     std::optional<size_t> nt_ = std::nullopt;
@@ -458,7 +458,7 @@ public:
     StlResult<T> fit(const std::vector<T>& y, size_t np);
 };
 
-template <typename T>
+template <typename T = float>
 StlParams<T> params() {
     return StlParams<T>();
 }
