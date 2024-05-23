@@ -2,7 +2,7 @@
 
 Seasonal-trend decomposition for C++
 
-[![Build Status](https://github.com/ankane/stl-cpp/workflows/build/badge.svg?branch=master)](https://github.com/ankane/stl-cpp/actions)
+[![Build Status](https://github.com/ankane/stl-cpp/actions/workflows/build.yml/badge.svg)](https://github.com/ankane/stl-cpp/actions)
 
 ## Installation
 
