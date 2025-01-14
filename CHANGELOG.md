@@ -1,3 +1,7 @@
+## 0.1.5 (unreleased)
+
+- Added experimental support for CMake
+
 ## 0.1.4 (2024-01-26)
 
 - Fixed bug with `inner_loops` and `outer_loops`

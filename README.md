@@ -6,13 +6,15 @@ Seasonal-trend decomposition for C++
 
 ## Installation
 
-Add [the header](https://raw.githubusercontent.com/ankane/stl-cpp/v0.1.4/include/stl.hpp) to your project and include it
+Add [the header](https://raw.githubusercontent.com/ankane/stl-cpp/v0.1.4/include/stl.hpp) to your project (supports C++17 and greater).
+
+## Getting Started
+
+Include the header
 
 ```cpp
 #include "stl.hpp"
 ```
-
-## Getting Started
 
 Decompose a time series
 
