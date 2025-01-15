@@ -8,7 +8,7 @@ Seasonal-trend decomposition for C++
 
 Add [the header](https://raw.githubusercontent.com/ankane/stl-cpp/v0.1.4/include/stl.hpp) to your project (supports C++17 and greater).
 
-There is also experimental support for CMake and FetchContent:
+There is also support for CMake and FetchContent:
 
 ```cmake
 include(FetchContent)

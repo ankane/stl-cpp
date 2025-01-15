@@ -1,6 +1,6 @@
 ## 0.1.5 (unreleased)
 
-- Added experimental support for CMake
+- Added support for CMake
 
 ## 0.1.4 (2024-01-26)
 
