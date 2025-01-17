@@ -21,6 +21,8 @@
 
 namespace stl {
 
+namespace {
+
 bool est(const float* y, size_t n, size_t len, int ideg, float xs, float* ys, size_t nleft, size_t nright, float* w, bool userw, const float* rw) {
     auto range = ((float) n) - 1.0;
     auto h = std::max(xs - ((float) nleft), ((float) nright) - xs);
@@ -349,6 +351,8 @@ float strength(const std::vector<float>& component, const std::vector<float>& re
         sr.push_back(component[i] + remainder[i]);
     }
     return std::max(0.0, 1.0 - var(remainder) / var(sr));
+}
+
 }
 
 class StlResult {
