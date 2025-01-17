@@ -355,22 +355,33 @@ float strength(const std::vector<float>& component, const std::vector<float>& re
 
 }
 
+/// A STL result.
 class StlResult {
 public:
+    /// Returns the seasonal component.
     std::vector<float> seasonal;
+
+    /// Returns the trend component.
     std::vector<float> trend;
+
+    /// Returns the remainder.
     std::vector<float> remainder;
+
+    /// Returns the weights.
     std::vector<float> weights;
 
+    /// Returns the seasonal strength.
     inline float seasonal_strength() {
         return strength(seasonal, remainder);
     }
 
+    /// Returns the trend strength.
     inline float trend_strength() {
         return strength(trend, remainder);
     }
 };
 
+/// A set of STL parameters.
 class StlParams {
     std::optional<size_t> ns_ = std::nullopt;
     std::optional<size_t> nt_ = std::nullopt;
@@ -386,70 +397,86 @@ class StlParams {
     bool robust_ = false;
 
 public:
+    /// Sets the length of the seasonal smoother.
     inline StlParams seasonal_length(size_t ns) {
         this->ns_ = ns;
         return *this;
     }
 
+    /// Sets the length of the trend smoother.
     inline StlParams trend_length(size_t nt) {
         this->nt_ = nt;
         return *this;
     }
 
+    /// Sets the length of the low-pass filter.
     inline StlParams low_pass_length(size_t nl) {
         this->nl_ = nl;
         return *this;
     }
 
+    /// Sets the degree of locally-fitted polynomial in seasonal smoothing.
     inline StlParams seasonal_degree(int isdeg) {
         this->isdeg_ = isdeg;
         return *this;
     }
 
+    /// Sets the degree of locally-fitted polynomial in trend smoothing.
     inline StlParams trend_degree(int itdeg) {
         this->itdeg_ = itdeg;
         return *this;
     }
 
+    /// Sets the degree of locally-fitted polynomial in low-pass smoothing.
     inline StlParams low_pass_degree(int ildeg) {
         this->ildeg_ = ildeg;
         return *this;
     }
 
+    /// Sets the skipping value for seasonal smoothing.
     inline StlParams seasonal_jump(size_t nsjump) {
         this->nsjump_ = nsjump;
         return *this;
     }
 
+    /// Sets the skipping value for trend smoothing.
     inline StlParams trend_jump(size_t ntjump) {
         this->ntjump_ = ntjump;
         return *this;
     }
 
+    /// Sets the skipping value for low-pass smoothing.
     inline StlParams low_pass_jump(size_t nljump) {
         this->nljump_ = nljump;
         return *this;
     }
 
+    /// Sets the number of loops for updating the seasonal and trend components.
     inline StlParams inner_loops(size_t ni) {
         this->ni_ = ni;
         return *this;
     }
 
+    /// Sets the number of iterations of robust fitting.
     inline StlParams outer_loops(size_t no) {
         this->no_ = no;
         return *this;
     }
 
+    /// Sets whether robustness iterations are to be used.
     inline StlParams robust(bool robust) {
         this->robust_ = robust;
         return *this;
     }
 
+    /// Decomposes a time series.
     StlResult fit(const float* y, size_t n, size_t np);
+
+    /// Decomposes a time series.
     StlResult fit(const std::vector<float>& y, size_t np);
 };
 
+/// Creates a new set of parameters.
 StlParams params() {
     return StlParams();
 }
