@@ -371,12 +371,12 @@ public:
     std::vector<float> weights;
 
     /// Returns the seasonal strength.
-    inline float seasonal_strength() {
+    inline float seasonal_strength() const {
         return strength(seasonal, remainder);
     }
 
     /// Returns the trend strength.
-    inline float trend_strength() {
+    inline float trend_strength() const {
         return strength(trend, remainder);
     }
 };
@@ -470,10 +470,10 @@ public:
     }
 
     /// Decomposes a time series.
-    StlResult fit(const float* y, size_t n, size_t np);
+    StlResult fit(const float* y, size_t n, size_t np) const;
 
     /// Decomposes a time series.
-    StlResult fit(const std::vector<float>& y, size_t np);
+    StlResult fit(const std::vector<float>& y, size_t np) const;
 };
 
 /// Creates a new set of parameters.
@@ -481,7 +481,7 @@ StlParams params() {
     return StlParams();
 }
 
-StlResult StlParams::fit(const float* y, size_t n, size_t np) {
+StlResult StlParams::fit(const float* y, size_t n, size_t np) const {
     if (n < 2 * np) {
         throw std::invalid_argument("series has less than two periods");
     }
@@ -534,7 +534,7 @@ StlResult StlParams::fit(const float* y, size_t n, size_t np) {
     return res;
 }
 
-StlResult StlParams::fit(const std::vector<float>& y, size_t np) {
+StlResult StlParams::fit(const std::vector<float>& y, size_t np) const {
     return StlParams::fit(y.data(), y.size(), np);
 }
 
