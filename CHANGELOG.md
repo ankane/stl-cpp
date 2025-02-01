@@ -1,4 +1,4 @@
-## 0.1.6 (unreleased)
+## 0.1.6 (2025-02-01)
 
 - Fixed visibility of private functions
 
