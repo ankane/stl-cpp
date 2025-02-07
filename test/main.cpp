@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "../include/stl.hpp"
+#include "../include/mstl.hpp"
 
 #define ASSERT_EXCEPTION(code, type, message) { \
     try {                                       \
@@ -46,7 +47,7 @@ std::vector<float> generate_series() {
     return series;
 }
 
-void test_works() {
+void stl_test_works() {
     auto series = generate_series();
     auto result = stl::params().fit(series, 7);
     assert_elements_in_delta({0.36926576, 0.75655484, -1.3324139, 1.9553658, -0.6044802}, first(result.seasonal, 5));
@@ -55,7 +56,7 @@ void test_works() {
     assert_elements_in_delta({1.0, 1.0, 1.0, 1.0, 1.0}, first(result.weights, 5));
 }
 
-void test_robust() {
+void stl_test_robust() {
     auto series = generate_series();
     auto result = stl::params().robust(true).fit(series, 7);
     assert_elements_in_delta({0.14922355, 0.47939026, -1.833231, 1.7411387, 0.8200711}, first(result.seasonal, 5));
@@ -64,15 +65,15 @@ void test_robust() {
     assert_elements_in_delta({0.99374926, 0.8129377, 0.9385952, 0.9458036, 0.29742217}, first(result.weights, 5));
 }
 
-void test_too_few_periods() {
+void stl_test_too_few_periods() {
     ASSERT_EXCEPTION(
         stl::params().fit(generate_series(), 16),
         std::invalid_argument,
-        "series has less than two periods"
+        "series is shorter than twice the period"
     );
 }
 
-void test_bad_seasonal_degree() {
+void stl_test_bad_seasonal_degree() {
     ASSERT_EXCEPTION(
         stl::params().seasonal_degree(2).fit(generate_series(), 7),
         std::invalid_argument,
@@ -80,22 +81,110 @@ void test_bad_seasonal_degree() {
     );
 }
 
-void test_seasonal_strength() {
+void stl_test_seasonal_strength() {
     auto result = stl::params().fit(generate_series(), 7);
     assert_in_delta(0.284111676315015, result.seasonal_strength());
 }
 
-void test_trend_strength() {
+void stl_test_trend_strength() {
     auto result = stl::params().fit(generate_series(), 7);
     assert_in_delta(0.16384245231864702, result.trend_strength());
 }
 
+void test_stl() {
+    stl_test_works();
+    stl_test_robust();
+    stl_test_too_few_periods();
+    stl_test_bad_seasonal_degree();
+    stl_test_seasonal_strength();
+    stl_test_trend_strength();
+}
+
+void mstl_handles_single_period() {
+    auto series = generate_series();
+    auto stl_params = stl::params()
+        .trend_length(13)
+        .low_pass_length(9)
+        .trend_jump(1)
+        .low_pass_jump(1)
+        .seasonal_jump(1)
+        .robust(false)
+        .low_pass_degree(1)
+        .trend_degree(1)
+        .seasonal_degree(1)
+        .seasonal_length(11)
+        .inner_loops(2)
+        .outer_loops(0);
+    auto stl_result = stl_params.fit(series, 7);
+    auto mstl_result = mstl::params().stl_params(stl_params).fit(series, {7});
+    assert_elements_in_delta(stl_result.seasonal, mstl_result.seasonal[0]);
+    assert_elements_in_delta(stl_result.remainder, mstl_result.remainder);
+    assert_elements_in_delta(stl_result.trend, mstl_result.trend);
+}
+
+void mstl_handles_multiple_periods() {
+    auto series = generate_series();
+    auto stl_params = stl::params()
+        .low_pass_length(13)
+        .seasonal_length(13)
+        .trend_length(13)
+        .trend_jump(1)
+        .low_pass_jump(1)
+        .seasonal_jump(1)
+        .robust(false)
+        .low_pass_degree(1)
+        .trend_degree(1)
+        .seasonal_degree(1)
+        .inner_loops(2)
+        .outer_loops(0);
+    auto result = mstl::params()
+        .iterations(2)
+        .seasonal_lengths({11, 13})
+        .stl_params(stl_params)
+        .fit(series, std::vector<size_t>{7, 10});
+    // Values taken from parallel implementation of MSTL (python statsmodels)
+    assert_elements_in_delta({1.02957645,  1.58052462, -2.58504053,3.82336372,  -1.37414519}, first(result.seasonal[0], 5));
+    assert_elements_in_delta({-1.130680493627964, 2.4459641040455704, 0.3115169691001893, -0.9364803464881937, -4.19763814690413}, first(result.seasonal[1], 5));
+    assert_elements_in_delta({4.899, 5.027 , 5.151, 5.270, 5.387}, first(result.trend, 5));
+    assert_elements_in_delta({0.20186475, -0.05349705, -0.8779612 ,  0.84224536,  0.18390715}, first(result.remainder, 5));
+}
+
+void mstl_handles_cox() {
+    auto series = generate_series();
+    auto stl_params = stl::params()
+        .low_pass_length(13)
+        .seasonal_length(13)
+        .trend_length(13)
+        .trend_jump(1)
+        .low_pass_jump(1)
+        .seasonal_jump(1)
+        .robust(false)
+        .low_pass_degree(1)
+        .trend_degree(1)
+        .seasonal_degree(1)
+        .inner_loops(2)
+        .outer_loops(0);
+    auto result = mstl::params()
+        .iterations(2)
+        .seasonal_lengths({11, 13})
+        .lambda(0.5f)
+        .stl_params(stl_params)
+        .fit(series, std::vector<size_t>{7, 10});
+    // Values taken from parallel implementation of MSTL (python statsmodels)
+    assert_elements_in_delta({1.0345437330165619, 1.002305016841231, -1.2867553566909664, 2.365208882252409, -1.5555646550017448}, first(result.seasonal[0], 5));
+    assert_elements_in_delta({-0.7310726692318952, 1.2115820999320608, 0.453518109999968, -1.3655355589288307, -2.6226520547233756}, first(result.seasonal[1], 5));
+    assert_elements_in_delta({1.97986303, 2.05898726, 2.13443353, 2.20569258, 2.27523968}, first(result.trend, 5));
+    assert_elements_in_delta({0.18880186, -0.27287437, -0.47276916,  0.79463409, -0.09702297}, first(result.remainder, 5));
+}
+
+void test_mstl() {
+    mstl_handles_single_period();
+    mstl_handles_multiple_periods();
+    mstl_handles_cox();
+}
+
 int main() {
-    test_works();
-    test_robust();
-    test_too_few_periods();
-    test_bad_seasonal_degree();
-    test_seasonal_strength();
-    test_trend_strength();
+    test_stl();
+    test_mstl();
     return 0;
 }

@@ -21,7 +21,7 @@
 
 namespace stl {
 
-namespace {
+namespace _ {
 
 bool est(const float* y, size_t n, size_t len, int ideg, float xs, float* ys, size_t nleft, size_t nright, float* w, bool userw, const float* rw) {
     auto range = ((float) n) - 1.0;
@@ -372,18 +372,17 @@ public:
 
     /// Returns the seasonal strength.
     inline float seasonal_strength() const {
-        return strength(seasonal, remainder);
+        return _::strength(seasonal, remainder);
     }
 
     /// Returns the trend strength.
     inline float trend_strength() const {
-        return strength(trend, remainder);
+        return _::strength(trend, remainder);
     }
 };
 
 /// A set of STL parameters.
 class StlParams {
-    std::optional<size_t> ns_ = std::nullopt;
     std::optional<size_t> nt_ = std::nullopt;
     std::optional<size_t> nl_ = std::nullopt;
     int isdeg_ = 0;
@@ -397,9 +396,11 @@ class StlParams {
     bool robust_ = false;
 
 public:
+    std::optional<size_t> ns = std::nullopt;
+
     /// Sets the length of the seasonal smoother.
     inline StlParams seasonal_length(size_t ns) {
-        this->ns_ = ns;
+        this->ns = ns;
         return *this;
     }
 
@@ -483,10 +484,10 @@ StlParams params() {
 
 StlResult StlParams::fit(const float* y, size_t n, size_t np) const {
     if (n < 2 * np) {
-        throw std::invalid_argument("series has less than two periods");
+        throw std::invalid_argument("series is shorter than twice the period");
     }
 
-    auto ns = this->ns_.value_or(np);
+    auto ns = this->ns.value_or(np);
 
     auto isdeg = this->isdeg_;
     auto itdeg = this->itdeg_;
@@ -524,7 +525,7 @@ StlResult StlParams::fit(const float* y, size_t n, size_t np) const {
     auto ntjump = this->ntjump_.value_or((size_t) ceil(((float) nt) / 10.0));
     auto nljump = this->nljump_.value_or((size_t) ceil(((float) nl) / 10.0));
 
-    stl(y, n, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, res.weights.data(), res.seasonal.data(), res.trend.data());
+    _::stl(y, n, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, res.weights.data(), res.seasonal.data(), res.trend.data());
 
     res.remainder.reserve(n);
     for (size_t i = 0; i < n; i++) {

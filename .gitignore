@@ -1,2 +1,6 @@
 /example/main
 /test/main
+CMakeCache.txt
+Makefile
+CMakeFiles/
+cmake_install.cmake
