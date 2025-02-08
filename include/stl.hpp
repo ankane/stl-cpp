@@ -178,7 +178,7 @@ void ess(const T* y, size_t n, size_t len, int ideg, size_t njump, bool userw, c
 template<typename T>
 void ma(const T* x, size_t n, size_t len, T* ave) {
     auto newn = n - len + 1;
-    auto flen = (T) len;
+    double flen = (T) len;
     double v = 0.0;
 
     // get the first average
@@ -186,14 +186,14 @@ void ma(const T* x, size_t n, size_t len, T* ave) {
         v += x[i];
     }
 
-    ave[0] = (T) v / flen;
+    ave[0] = (T) (v / flen);
     if (newn > 1) {
         auto k = len;
         auto m = 0;
         for (size_t j = 1; j < newn; j++) {
             // window down the array
             v = v - x[m] + x[k];
-            ave[j] = (T) v / flen;
+            ave[j] = (T) (v / flen);
             k += 1;
             m += 1;
         }
