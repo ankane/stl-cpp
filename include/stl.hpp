@@ -53,7 +53,7 @@ bool est(const T* y, size_t n, size_t len, int ideg, T xs, T* ys, size_t nleft, 
             if (r <= h1) {
                 w[j - 1] = 1.0;
             } else {
-                w[j - 1] = std::pow(1.0 - std::pow(r / h, 3), 3);
+                w[j - 1] = (T) std::pow(1.0 - std::pow(r / h, 3), 3);
             }
             if (userw) {
                 w[j - 1] *= rw[j - 1];
@@ -66,7 +66,7 @@ bool est(const T* y, size_t n, size_t len, int ideg, T xs, T* ys, size_t nleft, 
         return false;
     } else { // weighted least squares
         for (auto j = nleft; j <= nright; j++) { // make sum of w(j) == 1
-            w[j - 1] /= a;
+            w[j - 1] /= (T) a;
         }
 
         if (h > 0.0 && ideg > 0) { // use linear fit
@@ -84,7 +84,7 @@ bool est(const T* y, size_t n, size_t len, int ideg, T xs, T* ys, size_t nleft, 
 
                 // points are spread out enough to compute slope
                 for (auto j = nleft; j <= nright; j++) {
-                    w[j - 1] *= b * (((T) j) - a) + 1.0;
+                    w[j - 1] *= (T) (b * (((T) j) - a) + 1.0);
                 }
             }
         }
@@ -179,21 +179,21 @@ template<typename T>
 void ma(const T* x, size_t n, size_t len, T* ave) {
     auto newn = n - len + 1;
     auto flen = (T) len;
-    auto v = 0.0;
+    double v = 0.0;
 
     // get the first average
     for (size_t i = 0; i < len; i++) {
         v += x[i];
     }
 
-    ave[0] = v / flen;
+    ave[0] = (T) v / flen;
     if (newn > 1) {
         auto k = len;
         auto m = 0;
         for (size_t j = 1; j < newn; j++) {
             // window down the array
             v = v - x[m] + x[k];
-            ave[j] = v / flen;
+            ave[j] = (T) v / flen;
             k += 1;
             m += 1;
         }
@@ -228,7 +228,7 @@ void rwts(const T* y, size_t n, const T* fit, T* rw) {
         if (r <= c1) {
             rw[i] = 1.0;
         } else if (r <= c9) {
-            rw[i] = std::pow(1.0 - std::pow(r / cmad, 2), 2);
+            rw[i] = (T) std::pow(1.0 - std::pow(r / cmad, 2), 2);
         } else {
             rw[i] = 0.0;
         }
@@ -369,7 +369,7 @@ float strength(const std::vector<T>& component, const std::vector<T>& remainder)
     for (size_t i = 0; i < remainder.size(); i++) {
         sr.push_back(component[i] + remainder[i]);
     }
-    return std::max(0.0, 1.0 - var(remainder) / var(sr));
+    return (float) std::max(0.0, 1.0 - var(remainder) / var(sr));
 }
 
 }
@@ -666,7 +666,7 @@ std::vector<T> box_cox(const T* y, size_t y_size, float lambda) {
     res.reserve(y_size);
     if (lambda != 0.0) {
         for (size_t i = 0; i < y_size; i++) {
-            res.push_back((std::pow(y[i], lambda) - 1.0) / lambda);
+            res.push_back((T) (std::pow(y[i], lambda) - 1.0) / lambda);
         }
     } else {
         for (size_t i = 0; i < y_size; i++) {

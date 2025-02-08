@@ -37,7 +37,7 @@ void assert_in_delta(double exp, double act) {
 }
 
 template<typename T>
-void assert_elements_in_delta(const std::vector<T>& exp, const std::vector<T>& act) {
+void assert_elements_in_delta(const std::vector<double>& exp, const std::vector<T>& act) {
     assert(exp.size() == act.size());
     for (size_t i = 0; i < exp.size(); i++) {
         assert_in_delta(exp[i], act[i]);
