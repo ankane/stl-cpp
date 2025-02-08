@@ -50,6 +50,22 @@ std::vector<float> generate_series() {
     return series;
 }
 
+std::vector<float> max_seasonal_series() {
+    std::vector<float> series;
+    for (size_t i = 0; i < 30; i++) {
+        series.push_back(i % 7);
+    }
+    return series;
+}
+
+std::vector<float> max_trend_series() {
+    std::vector<float> series;
+    for (size_t i = 0; i < 30; i++) {
+        series.push_back(i);
+    }
+    return series;
+}
+
 void test_stl_works() {
     auto series = generate_series();
     auto result = stl::params().fit(series, 7);
@@ -101,10 +117,7 @@ void test_stl_seasonal_strength() {
 }
 
 void test_stl_seasonal_strength_max() {
-    std::vector<float> series;
-    for (size_t i = 0; i < 30; i++) {
-        series.push_back(i % 7);
-    }
+    auto series = max_seasonal_series();
     auto result = stl::params().fit(series, 7);
     assert_in_delta(1.0, result.seasonal_strength());
 }
@@ -115,10 +128,7 @@ void test_stl_trend_strength() {
 }
 
 void test_stl_trend_strength_max() {
-    std::vector<float> series;
-    for (size_t i = 0; i < 30; i++) {
-        series.push_back(i);
-    }
+    auto series = max_trend_series();
     auto result = stl::params().fit(series, 7);
     assert_in_delta(1.0, result.trend_strength());
 }
@@ -208,10 +218,7 @@ void test_mstl_seasonal_strength() {
 }
 
 void test_mstl_seasonal_strength_max() {
-    std::vector<float> series;
-    for (size_t i = 0; i < 30; i++) {
-        series.push_back(i % 7);
-    }
+    auto series = max_seasonal_series();
     auto result = stl::mstl_params().stl_params(stl::params().seasonal_length(7)).fit(series, {7});
     assert_in_delta(1.0, result.seasonal_strength()[0]);
 }
@@ -222,10 +229,7 @@ void test_mstl_trend_strength() {
 }
 
 void test_mstl_trend_strength_max() {
-    std::vector<float> series;
-    for (size_t i = 0; i < 30; i++) {
-        series.push_back(i);
-    }
+    auto series = max_trend_series();
     auto result = stl::mstl_params().stl_params(stl::params().seasonal_length(7)).fit(series, {7});
     assert_in_delta(1.0, result.trend_strength());
 }
