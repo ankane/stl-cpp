@@ -625,6 +625,11 @@ public:
 
     /// Decomposes a time series.
     MstlResult fit(const std::vector<float>& series, const std::vector<size_t>& periods) const;
+
+#if __cplusplus >= 202002L
+    // Decomposes a time series.
+    MstlResult fit(std::span<const float> series, const std::vector<size_t>& periods) const;
+#endif
 };
 
 /// Creates a new set of MSTL parameters.
@@ -781,5 +786,11 @@ MstlResult MstlParams::fit(const float* series, size_t series_size, const size_t
 MstlResult MstlParams::fit(const std::vector<float>& series, const std::vector<size_t>& periods) const {
     return MstlParams::fit(series.data(), series.size(), periods.data(), periods.size());
 }
+
+#if __cplusplus >= 202002L
+MstlResult MstlParams::fit(std::span<const float> series, const std::vector<size_t>& periods) const {
+    return MstlParams::fit(series.data(), series.size(), periods.data(), periods.size());
+}
+#endif
 
 }
