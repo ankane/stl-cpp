@@ -100,9 +100,27 @@ void test_stl_seasonal_strength() {
     assert_in_delta(0.284111676315015, result.seasonal_strength());
 }
 
+void test_stl_seasonal_strength_max() {
+    std::vector<float> series;
+    for (size_t i = 0; i < 30; i++) {
+        series.push_back(i % 7);
+    }
+    auto result = stl::params().fit(series, 7);
+    assert_in_delta(1.0, result.seasonal_strength());
+}
+
 void test_stl_trend_strength() {
     auto result = stl::params().fit(generate_series(), 7);
     assert_in_delta(0.16384245231864702, result.trend_strength());
+}
+
+void test_stl_trend_strength_max() {
+    std::vector<float> series;
+    for (size_t i = 0; i < 30; i++) {
+        series.push_back(i);
+    }
+    auto result = stl::params().fit(series, 7);
+    assert_in_delta(1.0, result.trend_strength());
 }
 
 void test_mstl_works() {
@@ -184,6 +202,34 @@ void test_mstl_too_few_periods() {
     );
 }
 
+void test_mstl_seasonal_strength() {
+    auto result = stl::mstl_params().stl_params(stl::params().seasonal_length(7)).fit(generate_series(), {7});
+    assert_in_delta(0.284111676315015, result.seasonal_strength()[0]);
+}
+
+void test_mstl_seasonal_strength_max() {
+    std::vector<float> series;
+    for (size_t i = 0; i < 30; i++) {
+        series.push_back(i % 7);
+    }
+    auto result = stl::mstl_params().stl_params(stl::params().seasonal_length(7)).fit(series, {7});
+    assert_in_delta(1.0, result.seasonal_strength()[0]);
+}
+
+void test_mstl_trend_strength() {
+    auto result = stl::mstl_params().stl_params(stl::params().seasonal_length(7)).fit(generate_series(), {7});
+    assert_in_delta(0.16384245231864702, result.trend_strength());
+}
+
+void test_mstl_trend_strength_max() {
+    std::vector<float> series;
+    for (size_t i = 0; i < 30; i++) {
+        series.push_back(i);
+    }
+    auto result = stl::mstl_params().stl_params(stl::params().seasonal_length(7)).fit(series, {7});
+    assert_in_delta(1.0, result.trend_strength());
+}
+
 int main() {
     test_stl_works();
 #if __cplusplus >= 202002L
@@ -193,7 +239,9 @@ int main() {
     test_stl_too_few_periods();
     test_stl_bad_seasonal_degree();
     test_stl_seasonal_strength();
+    test_stl_seasonal_strength_max();
     test_stl_trend_strength();
+    test_stl_trend_strength_max();
 
     test_mstl_works();
 #if __cplusplus >= 202002L
@@ -206,6 +254,10 @@ int main() {
     test_mstl_empty_periods();
     test_mstl_period_one();
     test_mstl_too_few_periods();
+    test_mstl_seasonal_strength();
+    test_mstl_seasonal_strength_max();
+    test_mstl_trend_strength();
+    test_mstl_trend_strength_max();
 
     return 0;
 }
