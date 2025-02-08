@@ -256,7 +256,7 @@ void ss(const T* y, size_t n, size_t np, size_t ns, int isdeg, size_t nsjump, bo
             work2[0] = work2[1];
         }
         xs = k + 1;
-        size_t nleft = std::max(1, (int) k - (int) ns + 1);
+        size_t nleft = (size_t) std::max(1, (int) k - (int) ns + 1);
         ok = est(work1, k, ns, isdeg, xs, &work2[k + 1], nleft, k, work4, userw, work3);
         if (!ok) {
             work2[k + 1] = work2[k];

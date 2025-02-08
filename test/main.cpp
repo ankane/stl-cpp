@@ -29,7 +29,7 @@ void print_vector(const std::vector<T>& x) {
 template<typename T>
 std::vector<T> first(const std::vector<T>& x, size_t n) {
     n = std::min(n, x.size());
-    return std::vector<T>(x.begin(), x.begin() + n);
+    return std::vector<T>(x.begin(), x.begin() + (ptrdiff_t) n);
 }
 
 void assert_in_delta(double exp, double act) {
