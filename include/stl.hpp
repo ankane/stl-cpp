@@ -493,16 +493,16 @@ public:
     }
 
     /// Decomposes a time series.
-    template<typename T = float>
+    template<typename T>
     StlResult<T> fit(const T* y, size_t n, size_t np) const;
 
     /// Decomposes a time series.
-    template<typename T = float>
+    template<typename T>
     StlResult<T> fit(const std::vector<T>& y, size_t np) const;
 
 #if __cplusplus >= 202002L
     /// Decomposes a time series.
-    template<typename T = float>
+    template<typename T>
     StlResult<T> fit(std::span<const T> y, size_t np) const;
 #endif
 };
@@ -639,16 +639,16 @@ public:
     }
 
     /// Decomposes a time series.
-    template<typename T = float>
+    template<typename T>
     MstlResult<T> fit(const T* series, size_t series_size, const size_t* periods, size_t periods_size) const;
 
     /// Decomposes a time series.
-    template<typename T = float>
+    template<typename T>
     MstlResult<T> fit(const std::vector<T>& series, const std::vector<size_t>& periods) const;
 
 #if __cplusplus >= 202002L
     /// Decomposes a time series.
-    template<typename T = float>
+    template<typename T>
     MstlResult<T> fit(std::span<const T> series, const std::vector<size_t>& periods) const;
 #endif
 };
