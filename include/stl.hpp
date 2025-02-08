@@ -647,7 +647,7 @@ public:
     MstlResult<T> fit(const std::vector<T>& series, const std::vector<size_t>& periods) const;
 
 #if __cplusplus >= 202002L
-    // Decomposes a time series.
+    /// Decomposes a time series.
     template<typename T = float>
     MstlResult<T> fit(std::span<const T> series, const std::vector<size_t>& periods) const;
 #endif
