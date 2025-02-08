@@ -19,6 +19,12 @@ jobs:
       - run: g++ -std=c++17 -Wall -Wextra -Werror -Iinclude -o example/main example/main.cpp
       - run: example/main
 
+      - if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install valgrind
+          valgrind --leak-check=yes test/main
+
       - if: ${{ startsWith(matrix.os, 'macos') }}
         run: /opt/homebrew/opt/llvm@18/bin/scan-build --status-bugs g++ -std=c++17 -o test/main test/main.cpp
 
