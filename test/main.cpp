@@ -203,8 +203,7 @@ void test_mstl_works() {
 template<typename T>
 void test_mstl_span() {
     auto series = generate_series<T>();
-    std::vector<size_t> periods = {6, 10};
-    auto result = stl::mstl_params().fit(std::span<const T>(series), periods);
+    auto result = stl::mstl_params().fit(std::span<const T>(series), {{6, 10}});
     assert_elements_in_delta(
         {0.28318232, 0.70529824, -1.980384, 2.1643379, -2.3356874},
         first(result.seasonal[0], 5)
