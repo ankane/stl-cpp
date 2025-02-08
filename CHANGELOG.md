@@ -1,7 +1,8 @@
-## 0.1.7 (unreleased)
+## 0.2.0 (unreleased)
 
 - Added support for MSTL
 - Added support for `std::span`
+- Changed `StlResult` to template
 
 ## 0.1.6 (2025-02-01)
 
