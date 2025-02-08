@@ -121,6 +121,7 @@ This library was ported from the [Fortran implementation](https://www.netlib.org
 ## References
 
 - [STL: A Seasonal-Trend Decomposition Procedure Based on Loess](https://www.scb.se/contentassets/ca21efb41fee47d293bbee5bf7be7fb3/stl-a-seasonal-trend-decomposition-procedure-based-on-loess.pdf)
+- [MSTL: A Seasonal-Trend Decomposition Algorithm for Time Series with Multiple Seasonal Patterns](https://arxiv.org/pdf/2107.13462.pdf)
 - [Measuring strength of trend and seasonality](https://otexts.com/fpp2/seasonal-strength.html)
 
 ## History
