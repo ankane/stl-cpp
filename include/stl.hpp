@@ -609,7 +609,7 @@ public:
     }
 
     /// Sets the lengths of the seasonal smoothers.
-    inline MstlParams seasonal_lengths(const std::vector<size_t> lengths) {
+    inline MstlParams seasonal_lengths(const std::vector<size_t>& lengths) {
         this->swin_ = lengths;
         return *this;
     }
