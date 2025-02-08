@@ -113,6 +113,17 @@ void test_mstl_works() {
     assert_elements_in_delta({-1.835711, 1.4661198, -1.3784716, 3.319045, -1.3605475}, first(result.remainder, 5));
 }
 
+#if __cplusplus >= 202002L
+void test_mstl_span() {
+    auto series = generate_series();
+    auto result = stl::mstl_params().fit(std::span{series}, {6, 10});
+    assert_elements_in_delta({0.28318232, 0.70529824, -1.980384, 2.1643379, -2.3356874}, first(result.seasonal[0], 5));
+    assert_elements_in_delta({1.4130436, 1.6048906, 0.050958008, -1.8706754, -1.7704514}, first(result.seasonal[1], 5));
+    assert_elements_in_delta({5.139485, 5.223691, 5.3078976, 5.387292, 5.4666862}, first(result.trend, 5));
+    assert_elements_in_delta({-1.835711, 1.4661198, -1.3784716, 3.319045, -1.3605475}, first(result.remainder, 5));
+}
+#endif
+
 void test_mstl_unsorted_periods() {
     auto result = stl::mstl_params().fit(generate_series(), {10, 6});
     assert_elements_in_delta({1.4130436, 1.6048906, 0.050958008, -1.8706754, -1.7704514}, first(result.seasonal[0], 5));
@@ -185,6 +196,9 @@ int main() {
     test_stl_trend_strength();
 
     test_mstl_works();
+#if __cplusplus >= 202002L
+    test_mstl_span();
+#endif
     test_mstl_unsorted_periods();
     test_mstl_lambda();
     test_mstl_lambda_zero();
