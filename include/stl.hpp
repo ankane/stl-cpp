@@ -621,7 +621,7 @@ std::vector<float> box_cox(const std::vector<float>& y, float lambda) {
     res.reserve(y.size());
     if (lambda != 0.0) {
         for (auto& yi : y) {
-            res.push_back((std::powf(yi, lambda) - 1.0) / lambda);
+            res.push_back((std::pow(yi, lambda) - 1.0) / lambda);
         }
     } else {
         for (auto& yi : y) {
