@@ -621,6 +621,9 @@ public:
     }
 
     /// Decomposes a time series.
+    MstlResult fit(const float* series, size_t series_size, const size_t* periods, size_t periods_size) const;
+
+    /// Decomposes a time series.
     MstlResult fit(const std::vector<float>& series, const std::vector<size_t>& periods) const;
 };
 
@@ -631,53 +634,53 @@ MstlParams mstl_params() {
 
 namespace {
 
-std::vector<float> box_cox(const std::vector<float>& y, float lambda) {
+std::vector<float> box_cox(const float* y, size_t y_size, float lambda) {
     std::vector<float> res;
-    res.reserve(y.size());
+    res.reserve(y_size);
     if (lambda != 0.0) {
-        for (auto& yi : y) {
-            res.push_back((std::pow(yi, lambda) - 1.0) / lambda);
+        for (size_t i = 0; i < y_size; i++) {
+            res.push_back((std::pow(y[i], lambda) - 1.0) / lambda);
         }
     } else {
-        for (auto& yi : y) {
-            res.push_back(std::log(yi));
+        for (size_t i = 0; i < y_size; i++) {
+            res.push_back(std::log(y[i]));
         }
     }
     return res;
 }
 
 std::tuple<std::vector<float>, std::vector<float>, std::vector<std::vector<float>>> mstl(
-    const std::vector<float>& x,
-    const std::vector<size_t>& seas_ids,
+    const float* x,
+    size_t k,
+    const size_t* seas_ids,
+    size_t seas_size,
     size_t iterate,
     std::optional<float> lambda,
     const std::optional<std::vector<size_t>>& swin,
     const StlParams& stl_params
 ) {
-    auto k = x.size();
-
     // keep track of indices instead of sorting seas_ids
     // so order is preserved with seasonality
     std::vector<size_t> indices;
-    for (size_t i = 0; i < seas_ids.size(); i++) {
+    for (size_t i = 0; i < seas_size; i++) {
         indices.push_back(i);
     }
     std::sort(indices.begin(), indices.end(), [&seas_ids](size_t a, size_t b) {
         return seas_ids[a] < seas_ids[b];
     });
 
-    if (seas_ids.size() == 1) {
+    if (seas_size == 1) {
         iterate = 1;
     }
 
     std::vector<std::vector<float>> seasonality;
-    seasonality.reserve(seas_ids.size());
+    seasonality.reserve(seas_size);
     std::vector<float> trend;
 
-    auto deseas = lambda.has_value() ? box_cox(x, lambda.value()) : x;
+    auto deseas = lambda.has_value() ? box_cox(x, k, lambda.value()) : std::vector<float>(x, x + k);
 
-    if (!seas_ids.empty()) {
-        for (size_t i = 0; i < seas_ids.size(); i++) {
+    if (seas_size != 0) {
+        for (size_t i = 0; i < seas_size; i++) {
             seasonality.push_back(std::vector<float>());
         }
 
@@ -726,19 +729,19 @@ std::tuple<std::vector<float>, std::vector<float>, std::vector<std::vector<float
 
 }
 
-MstlResult MstlParams::fit(const std::vector<float>& series, const std::vector<size_t>& periods) const {
+MstlResult MstlParams::fit(const float* series, size_t series_size, const size_t* periods, size_t periods_size) const {
     // return error to be consistent with stl
     // and ensure seasonal is always same length as periods
-    for (auto& v : periods) {
-        if (v < 2) {
+    for (size_t i = 0; i < periods_size; i++) {
+        if (periods[i] < 2) {
             throw std::invalid_argument("periods must be at least 2");
         }
     }
 
     // return error to be consistent with stl
     // and ensure seasonal is always same length as periods
-    for (auto& np : periods) {
-        if (series.size() < np * 2) {
+    for (size_t i = 0; i < periods_size; i++) {
+        if (series_size < periods[i] * 2) {
             throw std::invalid_argument("series has less than two periods");
         }
     }
@@ -752,14 +755,16 @@ MstlResult MstlParams::fit(const std::vector<float>& series, const std::vector<s
 
     if (swin_.has_value()) {
         auto swin = swin_.value();
-        if (swin.size() != periods.size()) {
+        if (swin.size() != periods_size) {
             throw std::invalid_argument("seasonal_lengths must have the same length as periods");
         }
     }
 
     auto [trend, remainder, seasonal] = mstl(
         series,
+        series_size,
         periods,
+        periods_size,
         iterate_,
         lambda_,
         swin_,
@@ -771,6 +776,10 @@ MstlResult MstlParams::fit(const std::vector<float>& series, const std::vector<s
         trend,
         remainder
     };
+}
+
+MstlResult MstlParams::fit(const std::vector<float>& series, const std::vector<size_t>& periods) const {
+    return MstlParams::fit(series.data(), series.size(), periods.data(), periods.size());
 }
 
 }
