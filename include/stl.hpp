@@ -421,68 +421,68 @@ private:
 
 public:
     /// Sets the length of the seasonal smoother.
-    inline StlParams seasonal_length(size_t ns) {
-        this->ns_ = ns;
+    inline StlParams seasonal_length(size_t length) {
+        this->ns_ = length;
         return *this;
     }
 
     /// Sets the length of the trend smoother.
-    inline StlParams trend_length(size_t nt) {
-        this->nt_ = nt;
+    inline StlParams trend_length(size_t length) {
+        this->nt_ = length;
         return *this;
     }
 
     /// Sets the length of the low-pass filter.
-    inline StlParams low_pass_length(size_t nl) {
-        this->nl_ = nl;
+    inline StlParams low_pass_length(size_t length) {
+        this->nl_ = length;
         return *this;
     }
 
     /// Sets the degree of locally-fitted polynomial in seasonal smoothing.
-    inline StlParams seasonal_degree(int isdeg) {
-        this->isdeg_ = isdeg;
+    inline StlParams seasonal_degree(int degree) {
+        this->isdeg_ = degree;
         return *this;
     }
 
     /// Sets the degree of locally-fitted polynomial in trend smoothing.
-    inline StlParams trend_degree(int itdeg) {
-        this->itdeg_ = itdeg;
+    inline StlParams trend_degree(int degree) {
+        this->itdeg_ = degree;
         return *this;
     }
 
     /// Sets the degree of locally-fitted polynomial in low-pass smoothing.
-    inline StlParams low_pass_degree(int ildeg) {
-        this->ildeg_ = ildeg;
+    inline StlParams low_pass_degree(int degree) {
+        this->ildeg_ = degree;
         return *this;
     }
 
     /// Sets the skipping value for seasonal smoothing.
-    inline StlParams seasonal_jump(size_t nsjump) {
-        this->nsjump_ = nsjump;
+    inline StlParams seasonal_jump(size_t jump) {
+        this->nsjump_ = jump;
         return *this;
     }
 
     /// Sets the skipping value for trend smoothing.
-    inline StlParams trend_jump(size_t ntjump) {
-        this->ntjump_ = ntjump;
+    inline StlParams trend_jump(size_t jump) {
+        this->ntjump_ = jump;
         return *this;
     }
 
     /// Sets the skipping value for low-pass smoothing.
-    inline StlParams low_pass_jump(size_t nljump) {
-        this->nljump_ = nljump;
+    inline StlParams low_pass_jump(size_t jump) {
+        this->nljump_ = jump;
         return *this;
     }
 
     /// Sets the number of loops for updating the seasonal and trend components.
-    inline StlParams inner_loops(size_t ni) {
-        this->ni_ = ni;
+    inline StlParams inner_loops(size_t loops) {
+        this->ni_ = loops;
         return *this;
     }
 
     /// Sets the number of iterations of robust fitting.
-    inline StlParams outer_loops(size_t no) {
-        this->no_ = no;
+    inline StlParams outer_loops(size_t loops) {
+        this->no_ = loops;
         return *this;
     }
 
@@ -494,16 +494,16 @@ public:
 
     /// Decomposes a time series.
     template<typename T>
-    StlResult<T> fit(const T* y, size_t n, size_t np) const;
+    StlResult<T> fit(const T* series, size_t series_size, size_t period) const;
 
     /// Decomposes a time series.
     template<typename T>
-    StlResult<T> fit(const std::vector<T>& y, size_t np) const;
+    StlResult<T> fit(const std::vector<T>& series, size_t period) const;
 
 #if __cplusplus >= 202002L
     /// Decomposes a time series.
     template<typename T>
-    StlResult<T> fit(std::span<const T> y, size_t np) const;
+    StlResult<T> fit(std::span<const T> series, size_t period) const;
 #endif
 };
 
@@ -513,7 +513,11 @@ StlParams params() {
 }
 
 template<typename T>
-StlResult<T> StlParams::fit(const T* y, size_t n, size_t np) const {
+StlResult<T> StlParams::fit(const T* series, size_t series_size, size_t period) const {
+    auto y = series;
+    auto np = period;
+    auto n = series_size;
+
     if (n < 2 * np) {
         throw std::invalid_argument("series has less than two periods");
     }
@@ -567,14 +571,14 @@ StlResult<T> StlParams::fit(const T* y, size_t n, size_t np) const {
 }
 
 template<typename T>
-StlResult<T> StlParams::fit(const std::vector<T>& y, size_t np) const {
-    return StlParams::fit(y.data(), y.size(), np);
+StlResult<T> StlParams::fit(const std::vector<T>& series, size_t period) const {
+    return StlParams::fit(series.data(), series.size(), period);
 }
 
 #if __cplusplus >= 202002L
 template<typename T>
-StlResult<T> StlParams::fit(std::span<const T> y, size_t np) const {
-    return StlParams::fit(y.data(), y.size(), np);
+StlResult<T> StlParams::fit(std::span<const T> series, size_t period) const {
+    return StlParams::fit(series.data(), series.size(), period);
 }
 #endif
 
