@@ -492,16 +492,16 @@ public:
         return *this;
     }
 
-    /// Decomposes a time series.
+    /// Decomposes a time series from an array.
     template<typename T>
     StlResult<T> fit(const T* series, size_t series_size, size_t period) const;
 
-    /// Decomposes a time series.
+    /// Decomposes a time series from a vector.
     template<typename T>
     StlResult<T> fit(const std::vector<T>& series, size_t period) const;
 
 #if __cplusplus >= 202002L
-    /// Decomposes a time series.
+    /// Decomposes a time series from a span.
     template<typename T>
     StlResult<T> fit(std::span<const T> series, size_t period) const;
 #endif
@@ -642,16 +642,16 @@ public:
         return *this;
     }
 
-    /// Decomposes a time series.
+    /// Decomposes a time series from an array.
     template<typename T>
     MstlResult<T> fit(const T* series, size_t series_size, const size_t* periods, size_t periods_size) const;
 
-    /// Decomposes a time series.
+    /// Decomposes a time series from a vector.
     template<typename T>
     MstlResult<T> fit(const std::vector<T>& series, const std::vector<size_t>& periods) const;
 
 #if __cplusplus >= 202002L
-    /// Decomposes a time series.
+    /// Decomposes a time series from a span.
     template<typename T>
     MstlResult<T> fit(std::span<const T> series, std::span<const size_t> periods) const;
 #endif
