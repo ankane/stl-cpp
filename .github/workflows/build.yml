@@ -13,6 +13,9 @@ jobs:
       - run: g++ -std=c++17 -Wall -Wextra -Werror -o test/main test/main.cpp
       - run: test/main
 
+      - run: g++ -std=c++20 -Wall -Wextra -Werror -o test/main test/main.cpp
+      - run: test/main
+
       - run: g++ -std=c++17 -Wall -Wextra -Werror -Iinclude -o example/main example/main.cpp
       - run: example/main
 

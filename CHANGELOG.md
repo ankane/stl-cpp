@@ -1,6 +1,7 @@
 ## 0.1.7 (unreleased)
 
 - Added support for MSTL
+- Added support for `std::span`
 
 ## 0.1.6 (2025-02-01)
 

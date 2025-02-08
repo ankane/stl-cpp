@@ -3,6 +3,10 @@
 #include <iostream>
 #include <vector>
 
+#if __cplusplus >= 202002L
+#include <span>
+#endif
+
 #include "../include/stl.hpp"
 
 #define ASSERT_EXCEPTION(code, type, message) { \
@@ -54,6 +58,17 @@ void test_stl_works() {
     assert_elements_in_delta({-0.17336464, 3.3337379, -1.6829021, 1.8841844, -4.7011037}, first(result.remainder, 5));
     assert_elements_in_delta({1.0, 1.0, 1.0, 1.0, 1.0}, first(result.weights, 5));
 }
+
+#if __cplusplus >= 202002L
+void test_stl_span() {
+    auto series = generate_series();
+    auto result = stl::params().fit(std::span{series}, 7);
+    assert_elements_in_delta({0.36926576, 0.75655484, -1.3324139, 1.9553658, -0.6044802}, first(result.seasonal, 5));
+    assert_elements_in_delta({4.804099, 4.9097075, 5.015316, 5.16045, 5.305584}, first(result.trend, 5));
+    assert_elements_in_delta({-0.17336464, 3.3337379, -1.6829021, 1.8841844, -4.7011037}, first(result.remainder, 5));
+    assert_elements_in_delta({1.0, 1.0, 1.0, 1.0, 1.0}, first(result.weights, 5));
+}
+#endif
 
 void test_stl_robust() {
     auto series = generate_series();
@@ -160,6 +175,9 @@ void test_mstl_too_few_periods() {
 
 int main() {
     test_stl_works();
+#if __cplusplus >= 202002L
+    test_stl_span();
+#endif
     test_stl_robust();
     test_stl_too_few_periods();
     test_stl_bad_seasonal_degree();

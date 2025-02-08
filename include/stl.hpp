@@ -24,6 +24,10 @@
 #include <tuple>
 #include <vector>
 
+#if __cplusplus >= 202002L
+#include <span>
+#endif
+
 namespace stl {
 
 namespace {
@@ -482,6 +486,11 @@ public:
 
     /// Decomposes a time series.
     StlResult fit(const std::vector<float>& y, size_t np) const;
+
+#if __cplusplus >= 202002L
+    /// Decomposes a time series.
+    StlResult fit(std::span<const float> y, size_t np) const;
+#endif
 };
 
 /// Creates a new set of STL parameters.
@@ -545,6 +554,12 @@ StlResult StlParams::fit(const float* y, size_t n, size_t np) const {
 StlResult StlParams::fit(const std::vector<float>& y, size_t np) const {
     return StlParams::fit(y.data(), y.size(), np);
 }
+
+#if __cplusplus >= 202002L
+StlResult StlParams::fit(std::span<const float> y, size_t np) const {
+    return StlParams::fit(y.data(), y.size(), np);
+}
+#endif
 
 /// A MSTL result.
 class MstlResult {
