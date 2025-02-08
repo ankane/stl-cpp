@@ -46,7 +46,7 @@ std::vector<float> generate_series() {
     return series;
 }
 
-void test_works() {
+void test_stl_works() {
     auto series = generate_series();
     auto result = stl::params().fit(series, 7);
     assert_elements_in_delta({0.36926576, 0.75655484, -1.3324139, 1.9553658, -0.6044802}, first(result.seasonal, 5));
@@ -55,7 +55,7 @@ void test_works() {
     assert_elements_in_delta({1.0, 1.0, 1.0, 1.0, 1.0}, first(result.weights, 5));
 }
 
-void test_robust() {
+void test_stl_robust() {
     auto series = generate_series();
     auto result = stl::params().robust(true).fit(series, 7);
     assert_elements_in_delta({0.14922355, 0.47939026, -1.833231, 1.7411387, 0.8200711}, first(result.seasonal, 5));
@@ -64,7 +64,7 @@ void test_robust() {
     assert_elements_in_delta({0.99374926, 0.8129377, 0.9385952, 0.9458036, 0.29742217}, first(result.weights, 5));
 }
 
-void test_too_few_periods() {
+void test_stl_too_few_periods() {
     ASSERT_EXCEPTION(
         stl::params().fit(generate_series(), 16),
         std::invalid_argument,
@@ -72,7 +72,7 @@ void test_too_few_periods() {
     );
 }
 
-void test_bad_seasonal_degree() {
+void test_stl_bad_seasonal_degree() {
     ASSERT_EXCEPTION(
         stl::params().seasonal_degree(2).fit(generate_series(), 7),
         std::invalid_argument,
@@ -80,22 +80,100 @@ void test_bad_seasonal_degree() {
     );
 }
 
-void test_seasonal_strength() {
+void test_stl_seasonal_strength() {
     auto result = stl::params().fit(generate_series(), 7);
     assert_in_delta(0.284111676315015, result.seasonal_strength());
 }
 
-void test_trend_strength() {
+void test_stl_trend_strength() {
     auto result = stl::params().fit(generate_series(), 7);
     assert_in_delta(0.16384245231864702, result.trend_strength());
 }
 
+void test_mstl_works() {
+    auto result = stl::mstl_params().fit(generate_series(), {6, 10});
+    assert_elements_in_delta({0.28318232, 0.70529824, -1.980384, 2.1643379, -2.3356874}, first(result.seasonal[0], 5));
+    assert_elements_in_delta({1.4130436, 1.6048906, 0.050958008, -1.8706754, -1.7704514}, first(result.seasonal[1], 5));
+    assert_elements_in_delta({5.139485, 5.223691, 5.3078976, 5.387292, 5.4666862}, first(result.trend, 5));
+    assert_elements_in_delta({-1.835711, 1.4661198, -1.3784716, 3.319045, -1.3605475}, first(result.remainder, 5));
+}
+
+void test_mstl_unsorted_periods() {
+    auto result = stl::mstl_params().fit(generate_series(), {10, 6});
+    assert_elements_in_delta({1.4130436, 1.6048906, 0.050958008, -1.8706754, -1.7704514}, first(result.seasonal[0], 5));
+    assert_elements_in_delta({0.28318232, 0.70529824, -1.980384, 2.1643379, -2.3356874}, first(result.seasonal[1], 5));
+    assert_elements_in_delta({5.139485, 5.223691, 5.3078976, 5.387292, 5.4666862}, first(result.trend, 5));
+    assert_elements_in_delta({-1.835711, 1.4661198, -1.3784716, 3.319045, -1.3605475}, first(result.remainder, 5));
+}
+
+void test_mstl_lambda() {
+    auto result = stl::mstl_params().lambda(0.5).fit(generate_series(), {6, 10});
+    assert_elements_in_delta({0.43371448, 0.10503793, -0.7178911, 1.2356076, -1.8253292}, first(result.seasonal[0], 5));
+    assert_elements_in_delta({1.0437742, 0.8650516, 0.07303603, -1.428663, -1.1990008}, first(result.seasonal[1], 5));
+    assert_elements_in_delta({2.0748303, 2.1291165, 2.1834028, 2.2330272, 2.2826517}, first(result.trend, 5));
+    assert_elements_in_delta({-1.0801829, 0.900794, -0.7101207, 1.9600279, -1.2583216}, first(result.remainder, 5));
+}
+
+void test_mstl_lambda_zero() {
+    std::vector<float> series;
+    for (auto& v : generate_series()) {
+        series.push_back(v + 1);
+    }
+    auto result = stl::mstl_params().lambda(0.0).fit(series, {6, 10});
+    assert_elements_in_delta({0.18727916, 0.029921893, -0.2716494, 0.47748315, -0.7320051}, first(result.seasonal[0], 5));
+    assert_elements_in_delta({0.42725056, 0.32145387, -0.019030934, -0.56607914, -0.46765903}, first(result.seasonal[1], 5));
+    assert_elements_in_delta({1.592807, 1.6144379, 1.6360688, 1.6559447, 1.6758206}, first(result.trend, 5));
+    assert_elements_in_delta({-0.41557717, 0.33677137, -0.24677622, 0.7352363, -0.47615635}, first(result.remainder, 5));
+}
+
+void test_mstl_lambda_out_of_range() {
+    ASSERT_EXCEPTION(
+        stl::mstl_params().lambda(2.0).fit(generate_series(), {6, 10}),
+        std::invalid_argument,
+        "lambda must be between 0 and 1"
+    );
+}
+
+void test_mstl_empty_periods() {
+    ASSERT_EXCEPTION(
+        stl::mstl_params().fit(generate_series(), {}),
+        std::invalid_argument,
+        "periods must not be empty"
+    );
+}
+
+void test_mstl_period_one() {
+    ASSERT_EXCEPTION(
+        stl::mstl_params().fit(generate_series(), {1}),
+        std::invalid_argument,
+        "periods must be at least 2"
+    );
+}
+
+void test_mstl_too_few_periods() {
+    ASSERT_EXCEPTION(
+        stl::mstl_params().fit(generate_series(), {16}),
+        std::invalid_argument,
+        "series has less than two periods"
+    );
+}
+
 int main() {
-    test_works();
-    test_robust();
-    test_too_few_periods();
-    test_bad_seasonal_degree();
-    test_seasonal_strength();
-    test_trend_strength();
+    test_stl_works();
+    test_stl_robust();
+    test_stl_too_few_periods();
+    test_stl_bad_seasonal_degree();
+    test_stl_seasonal_strength();
+    test_stl_trend_strength();
+
+    test_mstl_works();
+    test_mstl_unsorted_periods();
+    test_mstl_lambda();
+    test_mstl_lambda_zero();
+    test_mstl_lambda_out_of_range();
+    test_mstl_empty_periods();
+    test_mstl_period_one();
+    test_mstl_too_few_periods();
+
     return 0;
 }

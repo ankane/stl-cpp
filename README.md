@@ -62,9 +62,17 @@ Get robustness weights
 res.weights;
 ```
 
+## Multiple Seasonality
+
+Specify multiple periods [unreleased]
+
+```cpp
+auto res = stl::mstl_params().fit(series, {7, 365});
+```
+
 ## Parameters
 
-Set parameters
+Set STL parameters
 
 ```cpp
 stl::params()
@@ -80,6 +88,16 @@ stl::params()
     .inner_loops(2)         // number of loops for updating the seasonal and trend components
     .outer_loops(0)         // number of iterations of robust fitting
     .robust(false);         // if robustness iterations are to be used
+```
+
+Set MSTL parameters [unreleased]
+
+```cpp
+stl::mstl_params()
+    .iterations(2)                  // number of iterations
+    .lambda(0.5)                    // lambda for Box-Cox transformation
+    .seasonal_lengths({11, 15})     // lengths of the seasonal smoothers
+    .stl_params(stl::params());     // STL params
 ```
 
 ## Strength

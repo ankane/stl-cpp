@@ -8,6 +8,10 @@
  * Cleveland, R. B., Cleveland, W. S., McRae, J. E., & Terpenning, I. (1990).
  * STL: A Seasonal-Trend Decomposition Procedure Based on Loess.
  * Journal of Official Statistics, 6(1), 3-33.
+ *
+ * Bandara, K., Hyndman, R. J., & Bergmeir, C. (2021).
+ * MSTL: A Seasonal-Trend Decomposition Algorithm for Time Series with Multiple Seasonal Patterns.
+ * arXiv:2107.13462 [stat.AP]. https://doi.org/10.48550/arXiv.2107.13462
  */
 
 #pragma once
@@ -17,6 +21,7 @@
 #include <numeric>
 #include <optional>
 #include <stdexcept>
+#include <tuple>
 #include <vector>
 
 namespace stl {
@@ -383,7 +388,10 @@ public:
 
 /// A set of STL parameters.
 class StlParams {
+public:
+    /// @private
     std::optional<size_t> ns_ = std::nullopt;
+private:
     std::optional<size_t> nt_ = std::nullopt;
     std::optional<size_t> nl_ = std::nullopt;
     int isdeg_ = 0;
@@ -476,7 +484,7 @@ public:
     StlResult fit(const std::vector<float>& y, size_t np) const;
 };
 
-/// Creates a new set of parameters.
+/// Creates a new set of STL parameters.
 StlParams params() {
     return StlParams();
 }
@@ -536,6 +544,218 @@ StlResult StlParams::fit(const float* y, size_t n, size_t np) const {
 
 StlResult StlParams::fit(const std::vector<float>& y, size_t np) const {
     return StlParams::fit(y.data(), y.size(), np);
+}
+
+/// A MSTL result.
+class MstlResult {
+public:
+    /// Returns the seasonal component.
+    std::vector<std::vector<float>> seasonal;
+
+    /// Returns the trend component.
+    std::vector<float> trend;
+
+    /// Returns the remainder.
+    std::vector<float> remainder;
+
+    /// Returns the seasonal strength.
+    inline std::vector<float> seasonal_strength() const {
+        std::vector<float> res;
+        for (auto& s : seasonal) {
+            res.push_back(strength(s, remainder));
+        }
+        return res;
+    }
+
+    /// Returns the trend strength.
+    inline float trend_strength() const {
+        return strength(trend, remainder);
+    }
+};
+
+/// A set of MSTL parameters.
+class MstlParams {
+    size_t iterate_ = 2;
+    std::optional<float> lambda_ = std::nullopt;
+    std::optional<std::vector<size_t>> swin_ = std::nullopt;
+    StlParams stl_params_;
+
+public:
+    /// Sets the number of iterations.
+    inline MstlParams iterations(size_t iterations) {
+        this->iterate_ = iterations;
+        return *this;
+    }
+
+    /// Sets lambda for Box-Cox transformation.
+    inline MstlParams lambda(float lambda) {
+        this->lambda_ = lambda;
+        return *this;
+    }
+
+    /// Sets the lengths of the seasonal smoothers.
+    inline MstlParams seasonal_lengths(const std::vector<size_t> lengths) {
+        this->swin_ = lengths;
+        return *this;
+    }
+
+    /// Sets the STL parameters.
+    inline MstlParams stl_params(const StlParams& stl_params) {
+        this->stl_params_ = stl_params;
+        return *this;
+    }
+
+    /// Decomposes a time series.
+    MstlResult fit(const std::vector<float>& series, const std::vector<size_t>& periods) const;
+};
+
+/// Creates a new set of MSTL parameters.
+MstlParams mstl_params() {
+    return MstlParams();
+}
+
+namespace {
+
+std::vector<float> box_cox(const std::vector<float>& y, float lambda) {
+    std::vector<float> res;
+    res.reserve(y.size());
+    if (lambda != 0.0) {
+        for (auto& yi : y) {
+            res.push_back((std::powf(yi, lambda) - 1.0) / lambda);
+        }
+    } else {
+        for (auto& yi : y) {
+            res.push_back(std::log(yi));
+        }
+    }
+    return res;
+}
+
+std::tuple<std::vector<float>, std::vector<float>, std::vector<std::vector<float>>> mstl(
+    const std::vector<float>& x,
+    const std::vector<size_t>& seas_ids,
+    size_t iterate,
+    std::optional<float> lambda,
+    const std::optional<std::vector<size_t>>& swin,
+    const StlParams& stl_params
+) {
+    auto k = x.size();
+
+    // keep track of indices instead of sorting seas_ids
+    // so order is preserved with seasonality
+    std::vector<size_t> indices;
+    for (size_t i = 0; i < seas_ids.size(); i++) {
+        indices.push_back(i);
+    }
+    std::sort(indices.begin(), indices.end(), [&seas_ids](size_t a, size_t b) {
+        return seas_ids[a] < seas_ids[b];
+    });
+
+    if (seas_ids.size() == 1) {
+        iterate = 1;
+    }
+
+    std::vector<std::vector<float>> seasonality;
+    seasonality.reserve(seas_ids.size());
+    std::vector<float> trend;
+
+    auto deseas = lambda.has_value() ? box_cox(x, lambda.value()) : x;
+
+    if (!seas_ids.empty()) {
+        for (size_t i = 0; i < seas_ids.size(); i++) {
+            seasonality.push_back(std::vector<float>());
+        }
+
+        for (size_t j = 0; j < iterate; j++) {
+            for (size_t i = 0; i < indices.size(); i++) {
+                auto idx = indices[i];
+
+                if (j > 0) {
+                    for (size_t ii = 0; ii < deseas.size(); ii++) {
+                        deseas[ii] += seasonality[idx][ii];
+                    }
+                }
+
+                StlResult fit;
+                if (swin) {
+                    StlParams clone = stl_params;
+                    fit = clone.seasonal_length((*swin)[idx]).fit(deseas, seas_ids[idx]);
+                } else if (stl_params.ns_.has_value()) {
+                    fit = stl_params.fit(deseas, seas_ids[idx]);
+                } else {
+                    StlParams clone = stl_params;
+                    fit = clone.seasonal_length(7 + 4 * (i + 1)).fit(deseas, seas_ids[idx]);
+                }
+
+                seasonality[idx] = fit.seasonal;
+                trend = fit.trend;
+
+                for (size_t ii = 0; ii < deseas.size(); ii++) {
+                    deseas[ii] -= seasonality[idx][ii];
+                }
+            }
+        }
+    } else {
+        // TODO use Friedman's Super Smoother for trend
+        throw std::invalid_argument("periods must not be empty");
+    }
+
+    std::vector<float> remainder;
+    remainder.reserve(k);
+    for (size_t i = 0; i < k; i++) {
+        remainder.push_back(deseas[i] - trend[i]);
+    }
+
+    return std::make_tuple(trend, remainder, seasonality);
+}
+
+}
+
+MstlResult MstlParams::fit(const std::vector<float>& series, const std::vector<size_t>& periods) const {
+    // return error to be consistent with stl
+    // and ensure seasonal is always same length as periods
+    for (auto& v : periods) {
+        if (v < 2) {
+            throw std::invalid_argument("periods must be at least 2");
+        }
+    }
+
+    // return error to be consistent with stl
+    // and ensure seasonal is always same length as periods
+    for (auto& np : periods) {
+        if (series.size() < np * 2) {
+            throw std::invalid_argument("series has less than two periods");
+        }
+    }
+
+    if (lambda_.has_value()) {
+        auto lambda = lambda_.value();
+        if (lambda < 0 || lambda > 1) {
+            throw std::invalid_argument("lambda must be between 0 and 1");
+        }
+    }
+
+    if (swin_.has_value()) {
+        auto swin = swin_.value();
+        if (swin.size() != periods.size()) {
+            throw std::invalid_argument("seasonal_lengths must have the same length as periods");
+        }
+    }
+
+    auto [trend, remainder, seasonal] = mstl(
+        series,
+        periods,
+        iterate_,
+        lambda_,
+        swin_,
+        stl_params_
+    );
+
+    return MstlResult {
+        seasonal,
+        trend,
+        remainder
+    };
 }
 
 }
