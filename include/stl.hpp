@@ -43,12 +43,12 @@ bool est(const float* y, size_t n, size_t len, int ideg, float xs, float* ys, si
     auto a = 0.0;
     for (auto j = nleft; j <= nright; j++) {
         w[j - 1] = 0.0;
-        auto r = fabs(((float) j) - xs);
+        auto r = std::abs(((float) j) - xs);
         if (r <= h9) {
             if (r <= h1) {
                 w[j - 1] = 1.0;
             } else {
-                w[j - 1] = pow(1.0 - pow(r / h, 3), 3);
+                w[j - 1] = std::pow(1.0 - std::pow(r / h, 3), 3);
             }
             if (userw) {
                 w[j - 1] *= rw[j - 1];
@@ -72,9 +72,9 @@ bool est(const float* y, size_t n, size_t len, int ideg, float xs, float* ys, si
             auto b = xs - a;
             auto c = 0.0;
             for (auto j = nleft; j <= nright; j++) {
-                c += w[j - 1] * pow(((float) j) - a, 2);
+                c += w[j - 1] * std::pow(((float) j) - a, 2);
             }
-            if (sqrt(c) > 0.001 * range) {
+            if (std::sqrt(c) > 0.001 * range) {
                 b /= c;
 
                 // points are spread out enough to compute slope
@@ -201,7 +201,7 @@ void fts(const float* x, size_t n, size_t np, float* trend, float* work) {
 
 void rwts(const float* y, size_t n, const float* fit, float* rw) {
     for (size_t i = 0; i < n; i++) {
-        rw[i] = fabs(y[i] - fit[i]);
+        rw[i] = std::abs(y[i] - fit[i]);
     }
 
     auto mid1 = (n - 1) / 2;
@@ -215,11 +215,11 @@ void rwts(const float* y, size_t n, const float* fit, float* rw) {
     auto c1 = 0.001 * cmad;
 
     for (size_t i = 0; i < n; i++) {
-        auto r = fabs(y[i] - fit[i]);
+        auto r = std::abs(y[i] - fit[i]);
         if (r <= c1) {
             rw[i] = 1.0;
         } else if (r <= c9) {
-            rw[i] = pow(1.0 - pow(r / cmad, 2), 2);
+            rw[i] = std::pow(1.0 - std::pow(r / cmad, 2), 2);
         } else {
             rw[i] = 0.0;
         }
@@ -344,7 +344,7 @@ float var(const std::vector<float>& series) {
     std::vector<float> tmp;
     tmp.reserve(series.size());
     for (auto v : series) {
-        tmp.push_back(pow(v - mean, 2));
+        tmp.push_back(std::pow(v - mean, 2));
     }
     return std::accumulate(tmp.begin(), tmp.end(), 0.0) / (series.size() - 1);
 }
