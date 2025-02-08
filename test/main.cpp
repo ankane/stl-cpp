@@ -32,8 +32,8 @@ std::vector<T> first(const std::vector<T>& x, size_t n) {
     return std::vector<T>(x.begin(), x.begin() + n);
 }
 
-void assert_in_delta(float exp, float act) {
-    assert(fabs(exp - act) < 0.001);
+void assert_in_delta(double exp, double act) {
+    assert(std::abs(exp - act) < 0.001);
 }
 
 template<typename T>
