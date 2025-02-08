@@ -352,14 +352,14 @@ void stl(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int i
 }
 
 template<typename T>
-float var(const std::vector<T>& series) {
+double var(const std::vector<T>& series) {
     auto mean = std::accumulate(series.begin(), series.end(), 0.0) / series.size();
-    std::vector<T> tmp;
-    tmp.reserve(series.size());
+    double sum = 0.0;
     for (auto v : series) {
-        tmp.push_back(std::pow(v - mean, 2));
+        double diff = v - mean;
+        sum += diff * diff;
     }
-    return std::accumulate(tmp.begin(), tmp.end(), 0.0) / (series.size() - 1);
+    return sum / (series.size() - 1);
 }
 
 template<typename T>
