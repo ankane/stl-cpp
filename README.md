@@ -67,7 +67,7 @@ res.weights;
 Specify multiple periods [unreleased]
 
 ```cpp
-auto res = stl::mstl_params().fit(series, {7, 365});
+auto res = stl::mstl_params().fit(series, {{7, 365}});
 ```
 
 ## Parameters
