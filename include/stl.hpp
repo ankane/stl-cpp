@@ -188,8 +188,8 @@ void ma(const T* x, size_t n, size_t len, T* ave) {
 
     ave[0] = (T) (v / flen);
     if (newn > 1) {
-        auto k = len;
-        auto m = 0;
+        size_t k = len;
+        size_t m = 0;
         for (size_t j = 1; j < newn; j++) {
             // window down the array
             v = v - x[m] + x[k];
