@@ -3,6 +3,7 @@
 - Added support for MSTL
 - Added support for `std::span`
 - Changed `StlResult` to template
+- Changed `seasonal_strength` and `trend_strength` methods to return `double` instead of `float`
 
 ## 0.1.6 (2025-02-01)
 

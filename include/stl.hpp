@@ -363,13 +363,13 @@ double var(const std::vector<T>& series) {
 }
 
 template<typename T>
-float strength(const std::vector<T>& component, const std::vector<T>& remainder) {
+double strength(const std::vector<T>& component, const std::vector<T>& remainder) {
     std::vector<T> sr;
     sr.reserve(remainder.size());
     for (size_t i = 0; i < remainder.size(); i++) {
         sr.push_back(component[i] + remainder[i]);
     }
-    return (float) std::max(0.0, 1.0 - var(remainder) / var(sr));
+    return std::max(0.0, 1.0 - var(remainder) / var(sr));
 }
 
 }
@@ -391,12 +391,12 @@ public:
     std::vector<T> weights;
 
     /// Returns the seasonal strength.
-    inline float seasonal_strength() const {
+    inline double seasonal_strength() const {
         return strength(seasonal, remainder);
     }
 
     /// Returns the trend strength.
-    inline float trend_strength() const {
+    inline double trend_strength() const {
         return strength(trend, remainder);
     }
 };
@@ -596,8 +596,8 @@ public:
     std::vector<T> remainder;
 
     /// Returns the seasonal strength.
-    inline std::vector<float> seasonal_strength() const {
-        std::vector<float> res;
+    inline std::vector<double> seasonal_strength() const {
+        std::vector<double> res;
         for (auto& s : seasonal) {
             res.push_back(strength(s, remainder));
         }
@@ -605,7 +605,7 @@ public:
     }
 
     /// Returns the trend strength.
-    inline float trend_strength() const {
+    inline double trend_strength() const {
         return strength(trend, remainder);
     }
 };
