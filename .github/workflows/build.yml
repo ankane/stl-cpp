@@ -37,3 +37,8 @@ jobs:
           cl /W3 /EHsc /std:c++17 test/main.cpp /link /out:test/main-msvc.exe
           call "test/main-msvc.exe"
         shell: cmd
+
+      - run: cmake -S . -B build
+      - run: cmake --build build
+      - run: cmake --install build --prefix /tmp
+      - run: g++ -std=c++17 -I/tmp/include example/main.cpp
