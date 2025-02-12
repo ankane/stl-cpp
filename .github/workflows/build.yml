@@ -41,4 +41,4 @@ jobs:
       - run: cmake -S . -B build
       - run: cmake --build build
       - run: cmake --install build --prefix /tmp
-      - run: g++ -std=c++17 -I/tmp/include example/main.cpp
+      - run: g++ -std=c++17 -I/tmp/include -o example/main example/main.cpp
