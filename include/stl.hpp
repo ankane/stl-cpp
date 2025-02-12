@@ -508,7 +508,7 @@ public:
 };
 
 /// Creates a new set of STL parameters.
-StlParams params() {
+inline StlParams params() {
     return StlParams();
 }
 
@@ -658,7 +658,7 @@ public:
 };
 
 /// Creates a new set of MSTL parameters.
-MstlParams mstl_params() {
+inline MstlParams mstl_params() {
     return MstlParams();
 }
 
