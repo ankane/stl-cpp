@@ -6,14 +6,14 @@ Seasonal-trend decomposition for C++
 
 ## Installation
 
-Add [the header](https://raw.githubusercontent.com/ankane/stl-cpp/v0.1.6/include/stl.hpp) to your project (supports C++17 and greater).
+Add [the header](https://raw.githubusercontent.com/ankane/stl-cpp/v0.2.0/include/stl.hpp) to your project (supports C++17 and greater).
 
 There is also support for CMake and FetchContent:
 
 ```cmake
 include(FetchContent)
 
-FetchContent_Declare(stl GIT_REPOSITORY https://github.com/ankane/stl-cpp.git GIT_TAG v0.1.6)
+FetchContent_Declare(stl GIT_REPOSITORY https://github.com/ankane/stl-cpp.git GIT_TAG v0.2.0)
 FetchContent_MakeAvailable(stl)
 
 target_link_libraries(app PRIVATE stl::stl)
