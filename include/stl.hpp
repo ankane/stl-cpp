@@ -33,7 +33,7 @@ namespace stl {
 namespace {
 
 template<typename T>
-bool est(const T* y, size_t n, size_t len, int ideg, T xs, T* ys, size_t nleft, size_t nright, T* w, bool userw, const T* rw) {
+bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, size_t nleft, size_t nright, std::vector<T>& w, bool userw, const std::vector<T>& rw) {
     auto range = ((T) n) - 1.0;
     auto h = std::max(xs - ((T) nleft), ((T) nright) - xs);
 
@@ -99,7 +99,7 @@ bool est(const T* y, size_t n, size_t len, int ideg, T xs, T* ys, size_t nleft, 
 }
 
 template<typename T>
-void ess(const T* y, size_t n, size_t len, int ideg, size_t njump, bool userw, const T* rw, T* ys, T* res) {
+void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, bool userw, const std::vector<T>& rw, T* ys, std::vector<T>& res) {
     if (n < 2) {
         ys[0] = y[0];
         return;
@@ -176,7 +176,7 @@ void ess(const T* y, size_t n, size_t len, int ideg, size_t njump, bool userw, c
 }
 
 template<typename T>
-void ma(const T* x, size_t n, size_t len, T* ave) {
+void ma(const std::vector<T>& x, size_t n, size_t len, std::vector<T>& ave) {
     auto newn = n - len + 1;
     double flen = (T) len;
     double v = 0.0;
@@ -201,14 +201,14 @@ void ma(const T* x, size_t n, size_t len, T* ave) {
 }
 
 template<typename T>
-void fts(const T* x, size_t n, size_t np, T* trend, T* work) {
+void fts(const std::vector<T>& x, size_t n, size_t np, std::vector<T>& trend, std::vector<T>& work) {
     ma(x, n, np, trend);
     ma(trend, n - np + 1, np, work);
     ma(work, n - 2 * np + 2, 3, trend);
 }
 
 template<typename T>
-void rwts(const T* y, size_t n, const T* fit, T* rw) {
+void rwts(const T* y, size_t n, const std::vector<T>& fit, std::vector<T>& rw) {
     for (size_t i = 0; i < n; i++) {
         rw[i] = std::abs(y[i] - fit[i]);
     }
@@ -217,7 +217,7 @@ void rwts(const T* y, size_t n, const T* fit, T* rw) {
     auto mid2 = n / 2;
 
     // sort
-    std::sort(rw, rw + n);
+    std::sort(rw.begin(), rw.begin() + n);
 
     auto cmad = 3.0 * (rw[mid1] + rw[mid2]); // 6 * median abs resid
     auto c9 = 0.999 * cmad;
@@ -236,7 +236,7 @@ void rwts(const T* y, size_t n, const T* fit, T* rw) {
 }
 
 template<typename T>
-void ss(const T* y, size_t n, size_t np, size_t ns, int isdeg, size_t nsjump, bool userw, T* rw, T* season, T* work1, T* work2, T* work3, T* work4) {
+void ss(const std::vector<T>& y, size_t n, size_t np, size_t ns, int isdeg, size_t nsjump, bool userw, std::vector<T>& rw, std::vector<T>& season, std::vector<T>& work1, std::vector<T>& work2, std::vector<T>& work3, std::vector<T>& work4) {
     for (size_t j = 1; j <= np; j++) {
         size_t k = (n - j) / np + 1;
 
@@ -248,7 +248,7 @@ void ss(const T* y, size_t n, size_t np, size_t ns, int isdeg, size_t nsjump, bo
                 work3[i - 1] = rw[(i - 1) * np + j - 1];
             }
         }
-        ess(work1, k, ns, isdeg, nsjump, userw, work3, work2 + 1, work4);
+        ess(work1, k, ns, isdeg, nsjump, userw, work3, work2.data() + 1, work4);
         T xs = 0.0;
         auto nright = std::min(ns, k);
         auto ok = est(work1, k, ns, isdeg, xs, &work2[0], 1, nright, work4, userw, work3);
@@ -268,7 +268,7 @@ void ss(const T* y, size_t n, size_t np, size_t ns, int isdeg, size_t nsjump, bo
 }
 
 template<typename T>
-void onestp(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int isdeg, int itdeg, int ildeg, size_t nsjump, size_t ntjump, size_t nljump, size_t ni, bool userw, T* rw, T* season, T* trend, T* work1, T* work2, T* work3, T* work4, T* work5) {
+void onestp(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int isdeg, int itdeg, int ildeg, size_t nsjump, size_t ntjump, size_t nljump, size_t ni, bool userw, std::vector<T>& rw, std::vector<T>& season, std::vector<T>& trend, std::vector<T>& work1, std::vector<T>& work2, std::vector<T>& work3, std::vector<T>& work4, std::vector<T>& work5) {
     for (size_t j = 0; j < ni; j++) {
         for (size_t i = 0; i < n; i++) {
             work1[i] = y[i] - trend[i];
@@ -276,19 +276,19 @@ void onestp(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, in
 
         ss(work1, n, np, ns, isdeg, nsjump, userw, rw, work2, work3, work4, work5, season);
         fts(work2, n + 2 * np, np, work3, work1);
-        ess(work3, n, nl, ildeg, nljump, false, work4, work1, work5);
+        ess(work3, n, nl, ildeg, nljump, false, work4, work1.data(), work5);
         for (size_t i = 0; i < n; i++) {
             season[i] = work2[np + i] - work1[i];
         }
         for (size_t i = 0; i < n; i++) {
             work1[i] = y[i] - season[i];
         }
-        ess(work1, n, nt, itdeg, ntjump, userw, rw, trend, work3);
+        ess(work1, n, nt, itdeg, ntjump, userw, rw, trend.data(), work3);
     }
 }
 
 template<typename T>
-void stl(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int isdeg, int itdeg, int ildeg, size_t nsjump, size_t ntjump, size_t nljump, size_t ni, size_t no, T* rw, T* season, T* trend) {
+void stl(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int isdeg, int itdeg, int ildeg, size_t nsjump, size_t ntjump, size_t nljump, size_t ni, size_t no, std::vector<T>& rw, std::vector<T>& season, std::vector<T>& trend) {
     if (ns < 3) {
         throw std::invalid_argument("seasonal_length must be at least 3");
     }
@@ -332,7 +332,7 @@ void stl(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int i
     size_t k = 0;
 
     while (true) {
-        onestp(y, n, np, ns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, userw, rw, season, trend, work1.data(), work2.data(), work3.data(), work4.data(), work5.data());
+        onestp(y, n, np, ns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, userw, rw, season, trend, work1, work2, work3, work4, work5);
         k += 1;
         if (k > no) {
             break;
@@ -340,7 +340,7 @@ void stl(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int i
         for (size_t i = 0; i < n; i++) {
             work1[i] = trend[i] + season[i];
         }
-        rwts(y, n, work1.data(), rw);
+        rwts(y, n, work1, rw);
         userw = true;
     }
 
@@ -560,7 +560,7 @@ StlResult<T> StlParams::fit(const T* series, size_t series_size, size_t period) 
     auto ntjump = this->ntjump_.value_or((size_t) ceil(((float) nt) / 10.0));
     auto nljump = this->nljump_.value_or((size_t) ceil(((float) nl) / 10.0));
 
-    stl(y, n, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, res.weights.data(), res.seasonal.data(), res.trend.data());
+    stl(y, n, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, res.weights, res.seasonal, res.trend);
 
     res.remainder.reserve(n);
     for (size_t i = 0; i < n; i++) {
