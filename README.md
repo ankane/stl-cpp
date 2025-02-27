@@ -64,7 +64,7 @@ res.weights;
 
 ## Multiple Seasonality
 
-Specify multiple periods [unreleased]
+Specify multiple periods
 
 ```cpp
 auto res = stl::mstl_params().fit(series, {{7, 365}});
@@ -90,7 +90,7 @@ stl::params()
     .robust(false);         // if robustness iterations are to be used
 ```
 
-Set MSTL parameters [unreleased]
+Set MSTL parameters
 
 ```cpp
 stl::mstl_params()
