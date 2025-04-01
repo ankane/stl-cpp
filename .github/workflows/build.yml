@@ -10,16 +10,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - run: g++ -std=c++17 -Wall -Wextra -Werror -o test/main test/main.cpp
-      - run: test/main
-
       - run: g++ -std=c++20 -Wall -Wextra -Werror -o test/main test/main.cpp
       - run: test/main
 
       - run: g++ -std=c++23 -Wall -Wextra -Werror -o test/main test/main.cpp
       - run: test/main
 
-      - run: g++ -std=c++17 -Wall -Wextra -Werror -Iinclude -o example/main example/main.cpp
+      - run: g++ -std=c++20 -Wall -Wextra -Werror -Iinclude -o example/main example/main.cpp
       - run: example/main
 
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}
@@ -29,16 +26,16 @@ jobs:
           valgrind --leak-check=yes test/main
 
       - if: ${{ startsWith(matrix.os, 'macos') }}
-        run: /opt/homebrew/opt/llvm@18/bin/scan-build --status-bugs g++ -std=c++17 -o test/main test/main.cpp
+        run: /opt/homebrew/opt/llvm@18/bin/scan-build --status-bugs g++ -std=c++20 -o test/main test/main.cpp
 
       - if: ${{ startsWith(matrix.os, 'windows') }}
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          cl /W3 /EHsc /std:c++17 test/main.cpp /link /out:test/main-msvc.exe
+          cl /W3 /EHsc /std:c++20 test/main.cpp /link /out:test/main-msvc.exe
           call "test/main-msvc.exe"
         shell: cmd
 
       - run: cmake -S . -B build
       - run: cmake --build build
       - run: cmake --install build --prefix /tmp
-      - run: g++ -std=c++17 -I/tmp/include -o example/main example/main.cpp
+      - run: g++ -std=c++20 -I/tmp/include -o example/main example/main.cpp

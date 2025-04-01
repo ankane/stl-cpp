@@ -1,3 +1,8 @@
+## 0.3.0 (unreleased)
+
+- Added support for `-Wunsafe-buffer-usage`
+- Dropped support for C++ < 20
+
 ## 0.2.0 (2025-02-23)
 
 - Added support for MSTL

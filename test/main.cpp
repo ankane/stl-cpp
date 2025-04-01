@@ -1,21 +1,18 @@
 #include <cassert>
 #include <cstring>
 #include <iostream>
-#include <vector>
-
-#if __cplusplus >= 202002L
 #include <span>
-#endif
+#include <vector>
 
 #include "../include/stl.hpp"
 
-#define ASSERT_EXCEPTION(code, type, message) { \
-    try {                                       \
-        code;                                   \
-        assert(false);                          \
-    } catch (const type &e) {                   \
-        assert(strcmp(e.what(), message) == 0); \
-    }                                           \
+#define ASSERT_EXCEPTION(code, type, message) {   \
+    try {                                         \
+        code;                                     \
+        assert(false);                            \
+    } catch (const type &e) {                     \
+        assert(std::string{e.what()} == message); \
+    }                                             \
 }
 
 template<typename T>
@@ -91,7 +88,6 @@ void test_stl_works() {
     assert_elements_in_delta({1.0, 1.0, 1.0, 1.0, 1.0}, first(result.weights, 5));
 }
 
-#if __cplusplus >= 202002L
 template<typename T>
 void test_stl_span() {
     auto series = generate_series<T>();
@@ -110,7 +106,6 @@ void test_stl_span() {
     );
     assert_elements_in_delta({1.0, 1.0, 1.0, 1.0, 1.0}, first(result.weights, 5));
 }
-#endif
 
 template<typename T>
 void test_stl_robust() {
@@ -199,7 +194,6 @@ void test_mstl_works() {
     );
 }
 
-#if __cplusplus >= 202002L
 template<typename T>
 void test_mstl_span() {
     auto series = generate_series<T>();
@@ -221,7 +215,6 @@ void test_mstl_span() {
         first(result.remainder, 5)
     );
 }
-#endif
 
 template<typename T>
 void test_mstl_unsorted_periods() {
@@ -363,9 +356,7 @@ void test_mstl_trend_strength_max() {
 template<typename T>
 void test_type() {
     test_stl_works<T>();
-#if __cplusplus >= 202002L
     test_stl_span<T>();
-#endif
     test_stl_robust<T>();
     test_stl_too_few_periods<T>();
     test_stl_bad_seasonal_degree<T>();
@@ -375,9 +366,7 @@ void test_type() {
     test_stl_trend_strength_max<T>();
 
     test_mstl_works<T>();
-#if __cplusplus >= 202002L
     test_mstl_span<T>();
-#endif
     test_mstl_unsorted_periods<T>();
     test_mstl_lambda<T>();
     test_mstl_lambda_zero<T>();

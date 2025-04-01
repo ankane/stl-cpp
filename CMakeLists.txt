@@ -7,7 +7,7 @@ include(GNUInstallDirs)
 add_library(stl INTERFACE)
 add_library(stl::stl ALIAS stl)
 
-target_compile_features(stl INTERFACE cxx_std_17)
+target_compile_features(stl INTERFACE cxx_std_20)
 
 target_include_directories(
     stl
