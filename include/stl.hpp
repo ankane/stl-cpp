@@ -256,7 +256,7 @@ void ss(const std::vector<T>& y, size_t n, size_t np, size_t ns, int isdeg, size
             work2[0] = work2[1];
         }
         xs = k + 1;
-        size_t nleft = (size_t) std::max(1, (int) k - (int) ns + 1);
+        size_t nleft = static_cast<size_t>(std::max(1, static_cast<int>(k) - static_cast<int>(ns) + 1));
         ok = est(work1, k, ns, isdeg, xs, &work2[k + 1], nleft, k, work4, userw, work3);
         if (!ok) {
             work2[k + 1] = work2[k];
@@ -406,6 +406,7 @@ class StlParams {
 public:
     /// @private
     std::optional<size_t> ns_ = std::nullopt;
+
 private:
     std::optional<size_t> nt_ = std::nullopt;
     std::optional<size_t> nl_ = std::nullopt;
@@ -535,15 +536,15 @@ StlResult<T> StlParams::fit(const T* series, size_t series_size, size_t period) 
     };
 
     auto ildeg = this->ildeg_.value_or(itdeg);
-    auto newns = std::max(ns, (size_t) 3);
+    auto newns = std::max(ns, static_cast<size_t>(3));
     if (newns % 2 == 0) {
         newns += 1;
     }
 
-    auto newnp = std::max(np, (size_t) 2);
-    auto nt = (size_t) ceil((1.5 * newnp) / (1.0 - 1.5 / (float) newns));
+    auto newnp = std::max(np, static_cast<size_t>(2));
+    auto nt = static_cast<size_t>(std::ceil((1.5 * newnp) / (1.0 - 1.5 / static_cast<float>(newns))));
     nt = this->nt_.value_or(nt);
-    nt = std::max(nt, (size_t) 3);
+    nt = std::max(nt, static_cast<size_t>(3));
     if (nt % 2 == 0) {
         nt += 1;
     }
@@ -556,9 +557,9 @@ StlResult<T> StlParams::fit(const T* series, size_t series_size, size_t period) 
     auto ni = this->ni_.value_or(this->robust_ ? 1 : 2);
     auto no = this->no_.value_or(this->robust_ ? 15 : 0);
 
-    auto nsjump = this->nsjump_.value_or((size_t) ceil(((float) newns) / 10.0));
-    auto ntjump = this->ntjump_.value_or((size_t) ceil(((float) nt) / 10.0));
-    auto nljump = this->nljump_.value_or((size_t) ceil(((float) nl) / 10.0));
+    auto nsjump = this->nsjump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(newns) / 10.0)));
+    auto ntjump = this->ntjump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nt) / 10.0)));
+    auto nljump = this->nljump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nl) / 10.0)));
 
     stl(y, n, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, res.weights, res.seasonal, res.trend);
 
