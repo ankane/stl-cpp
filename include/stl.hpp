@@ -30,7 +30,7 @@
 
 namespace stl {
 
-namespace {
+namespace detail {
 
 template<typename T>
 bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, size_t nleft, size_t nright, std::vector<T>& w, bool userw, const std::vector<T>& rw) {
@@ -372,12 +372,12 @@ double strength(const std::vector<T>& component, const std::vector<T>& remainder
     return std::max(0.0, 1.0 - var(remainder) / var(sr));
 }
 
-}
+} // namespace detail
 
 /// A STL result.
 template<typename T = float>
 class StlResult {
-public:
+  public:
     /// Returns the seasonal component.
     std::vector<T> seasonal;
 
@@ -392,22 +392,22 @@ public:
 
     /// Returns the seasonal strength.
     inline double seasonal_strength() const {
-        return strength(seasonal, remainder);
+        return detail::strength(seasonal, remainder);
     }
 
     /// Returns the trend strength.
     inline double trend_strength() const {
-        return strength(trend, remainder);
+        return detail::strength(trend, remainder);
     }
 };
 
 /// A set of STL parameters.
 class StlParams {
-public:
+  public:
     /// @private
     std::optional<size_t> ns_ = std::nullopt;
 
-private:
+  private:
     std::optional<size_t> nt_ = std::nullopt;
     std::optional<size_t> nl_ = std::nullopt;
     int isdeg_ = 0;
@@ -420,7 +420,7 @@ private:
     std::optional<size_t> no_ = std::nullopt;
     bool robust_ = false;
 
-public:
+  public:
     /// Sets the length of the seasonal smoother.
     inline StlParams seasonal_length(size_t length) {
         this->ns_ = length;
@@ -561,7 +561,7 @@ StlResult<T> StlParams::fit(const T* series, size_t series_size, size_t period) 
     auto ntjump = this->ntjump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nt) / 10.0)));
     auto nljump = this->nljump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nl) / 10.0)));
 
-    stl(y, n, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, res.weights, res.seasonal, res.trend);
+    detail::stl(y, n, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, res.weights, res.seasonal, res.trend);
 
     res.remainder.reserve(n);
     for (size_t i = 0; i < n; i++) {
@@ -586,7 +586,7 @@ StlResult<T> StlParams::fit(std::span<const T> series, size_t period) const {
 /// A MSTL result.
 template<typename T = float>
 class MstlResult {
-public:
+  public:
     /// Returns the seasonal component.
     std::vector<std::vector<T>> seasonal;
 
@@ -600,14 +600,14 @@ public:
     inline std::vector<double> seasonal_strength() const {
         std::vector<double> res;
         for (auto& s : seasonal) {
-            res.push_back(strength(s, remainder));
+            res.push_back(detail::strength(s, remainder));
         }
         return res;
     }
 
     /// Returns the trend strength.
     inline double trend_strength() const {
-        return strength(trend, remainder);
+        return detail::strength(trend, remainder);
     }
 };
 
@@ -618,7 +618,7 @@ class MstlParams {
     std::optional<std::vector<size_t>> swin_ = std::nullopt;
     StlParams stl_params_;
 
-public:
+  public:
     /// Sets the number of iterations.
     inline MstlParams iterations(size_t iterations) {
         this->iterate_ = iterations;
@@ -663,7 +663,7 @@ inline MstlParams mstl_params() {
     return MstlParams();
 }
 
-namespace {
+namespace detail {
 
 template<typename T>
 std::vector<T> box_cox(const T* y, size_t y_size, float lambda) {
@@ -760,7 +760,7 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
     return std::make_tuple(trend, remainder, seasonality);
 }
 
-}
+} // namespace detail
 
 template<typename T>
 MstlResult<T> MstlParams::fit(const T* series, size_t series_size, const size_t* periods, size_t periods_size) const {
@@ -794,7 +794,7 @@ MstlResult<T> MstlParams::fit(const T* series, size_t series_size, const size_t*
         }
     }
 
-    auto [trend, remainder, seasonal] = mstl(
+    auto [trend, remainder, seasonal] = detail::mstl(
         series,
         series_size,
         periods,
@@ -824,4 +824,4 @@ MstlResult<T> MstlParams::fit(std::span<const T> series, std::span<const size_t>
 }
 #endif
 
-}
+} // namespace stl
