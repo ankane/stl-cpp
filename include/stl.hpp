@@ -1,4 +1,4 @@
-/*!
+/*
  * STL C++ v0.2.0
  * https://github.com/ankane/stl-cpp
  * Unlicense OR MIT License
