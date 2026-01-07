@@ -5,10 +5,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-15, windows-2022]
+        os: [ubuntu-24.04, macos-26, windows-2025]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - run: g++ -std=c++17 -Wall -Wextra -Werror -o test/main test/main.cpp
       - run: test/main
@@ -29,7 +29,7 @@ jobs:
           valgrind --leak-check=yes test/main
 
       - if: ${{ startsWith(matrix.os, 'macos') }}
-        run: /opt/homebrew/opt/llvm@18/bin/scan-build --status-bugs g++ -std=c++17 -o test/main test/main.cpp
+        run: /opt/homebrew/opt/llvm@20/bin/scan-build --status-bugs g++ -std=c++17 -o test/main test/main.cpp
 
       - if: ${{ startsWith(matrix.os, 'windows') }}
         run: |
