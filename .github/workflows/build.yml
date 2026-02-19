@@ -8,7 +8,7 @@ jobs:
         os: [ubuntu-24.04, macos-26, windows-2025]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - run: g++ -std=c++17 -Wall -Wextra -Werror -o test/main test/main.cpp
       - run: test/main
@@ -22,16 +22,16 @@ jobs:
       - run: g++ -std=c++17 -Wall -Wextra -Werror -Iinclude -o example/main example/main.cpp
       - run: example/main
 
-      - if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      - if: ${{ runner.os == 'Linux' }}
         run: |
           sudo apt-get update
           sudo apt-get install valgrind
           valgrind --leak-check=yes test/main
 
-      - if: ${{ startsWith(matrix.os, 'macos') }}
+      - if: ${{ runner.os == 'macOS' }}
         run: /opt/homebrew/opt/llvm@20/bin/scan-build --status-bugs g++ -std=c++17 -o test/main test/main.cpp
 
-      - if: ${{ startsWith(matrix.os, 'windows') }}
+      - if: ${{ runner.os == 'Windows' }}
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           cl /W3 /EHsc /std:c++17 test/main.cpp /link /out:test/main-msvc.exe
