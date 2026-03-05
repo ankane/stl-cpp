@@ -26,7 +26,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install valgrind
-          valgrind --leak-check=yes test/main
+          valgrind --leak-check=yes --error-exitcode=1 test/main
 
       - if: ${{ runner.os == 'macOS' }}
         run: /opt/homebrew/opt/llvm@20/bin/scan-build --status-bugs g++ -std=c++17 -o test/main test/main.cpp
