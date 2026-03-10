@@ -12,34 +12,30 @@ jobs:
 
       - run: cmake -S . -B build -DCMAKE_CXX_STANDARD=17
       - run: cmake --build build
+      - if: ${{ runner.os == 'Windows' }}
+        run: cp build/Debug/test.exe build
       - run: build/test
 
       - run: cmake -S . -B build -DCMAKE_CXX_STANDARD=20
       - run: cmake --build build
+      - if: ${{ runner.os == 'Windows' }}
+        run: cp build/Debug/test.exe build
       - run: build/test
 
       - run: cmake -S . -B build -DCMAKE_CXX_STANDARD=23
       - run: cmake --build build
+      - if: ${{ runner.os == 'Windows' }}
+        run: cp build/Debug/test.exe build
       - run: build/test
-
-      - run: g++ -std=c++17 -Wall -Wextra -Werror -Iinclude -o example/main example/main.cpp
-      - run: example/main
 
       - if: ${{ runner.os == 'Linux' }}
         run: |
           sudo apt-get update
           sudo apt-get install valgrind
-          valgrind --leak-check=yes --error-exitcode=1 test/main
+          valgrind --leak-check=yes --error-exitcode=1 build/test
 
       - if: ${{ runner.os == 'macOS' }}
-        run: /opt/homebrew/opt/llvm@20/bin/scan-build --status-bugs g++ -std=c++17 -o test/main test/main.cpp
-
-      - if: ${{ runner.os == 'Windows' }}
-        run: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          cl /W3 /EHsc /std:c++17 test/main.cpp /link /out:test/main-msvc.exe
-          call "test/main-msvc.exe"
-        shell: cmd
+        run: /opt/homebrew/opt/llvm@20/bin/scan-build --status-bugs cmake --build build --clean-first
 
       - run: cmake -S . -B build
       - run: cmake --build build
