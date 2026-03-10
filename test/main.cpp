@@ -26,7 +26,7 @@ void print_vector(const std::vector<T>& x) {
 }
 
 template<typename T>
-std::vector<T> first(const std::vector<T>& x, size_t n) {
+std::vector<T> first(const std::vector<T>& x, ssize_t n) {
     auto view = std::views::take(x, n);
     return std::vector<T>(view.begin(), view.end());
 }
