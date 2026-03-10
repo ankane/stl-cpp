@@ -35,11 +35,11 @@ namespace detail {
 
 template<typename T>
 bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, size_t nleft, size_t nright, std::vector<T>& w, bool userw, const std::vector<T>& rw) {
-    T range = ((T) n) - static_cast<T>(1.0);
-    T h = std::max(xs - ((T) nleft), ((T) nright) - xs);
+    T range = static_cast<T>(n) - static_cast<T>(1.0);
+    T h = std::max(xs - static_cast<T>(nleft), static_cast<T>(nright) - xs);
 
     if (len > n) {
-        h += (T) ((len - n) / 2);
+        h += static_cast<T>((len - n) / 2);
     }
 
     T h9 = static_cast<T>(0.999) * h;
@@ -49,12 +49,12 @@ bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, s
     T a = 0.0;
     for (size_t j = nleft; j <= nright; j++) {
         w[j - 1] = 0.0;
-        T r = std::abs(((T) j) - xs);
+        T r = std::abs(static_cast<T>(j) - xs);
         if (r <= h9) {
             if (r <= h1) {
                 w[j - 1] = 1.0;
             } else {
-                w[j - 1] = (T) std::pow(1.0 - std::pow(r / h, 3), 3);
+                w[j - 1] = static_cast<T>(std::pow(1.0 - std::pow(r / h, 3.0), 3.0));
             }
             if (userw) {
                 w[j - 1] *= rw[j - 1];
@@ -67,25 +67,25 @@ bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, s
         return false;
     } else { // weighted least squares
         for (size_t j = nleft; j <= nright; j++) { // make sum of w(j) == 1
-            w[j - 1] /= (T) a;
+            w[j - 1] /= static_cast<T>(a);
         }
 
         if (h > 0.0 && ideg > 0) { // use linear fit
             T a = 0.0;
             for (size_t j = nleft; j <= nright; j++) { // weighted center of x values
-                a += w[j - 1] * ((T) j);
+                a += w[j - 1] * static_cast<T>(j);
             }
             T b = xs - a;
             T c = 0.0;
             for (size_t j = nleft; j <= nright; j++) {
-                c += w[j - 1] * std::pow(((T) j) - a, static_cast<T>(2));
+                c += w[j - 1] * std::pow(static_cast<T>(j) - a, static_cast<T>(2.0));
             }
             if (std::sqrt(c) > 0.001 * range) {
                 b /= c;
 
                 // points are spread out enough to compute slope
                 for (size_t j = nleft; j <= nright; j++) {
-                    w[j - 1] *= (T) (b * (((T) j) - a) + 1.0);
+                    w[j - 1] *= b * (static_cast<T>(j) - a) + static_cast<T>(1.0);
                 }
             }
         }
@@ -114,7 +114,7 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
         nleft = 1;
         nright = n;
         for (size_t i = 1; i <= n; i += newnj) {
-            bool ok = est(y, n, len, ideg, (T) i, &ys[i - 1], nleft, nright, res, userw, rw);
+            bool ok = est(y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw);
             if (!ok) {
                 ys[i - 1] = y[i - 1];
             }
@@ -128,7 +128,7 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
                 nleft += 1;
                 nright += 1;
             }
-            bool ok = est(y, n, len, ideg, (T) i, &ys[i - 1], nleft, nright, res, userw, rw);
+            bool ok = est(y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw);
             if (!ok) {
                 ys[i - 1] = y[i - 1];
             }
@@ -146,7 +146,7 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
                 nleft = i - nsh + 1;
                 nright = len + i - nsh;
             }
-            bool ok = est(y, n, len, ideg, (T) i, &ys[i - 1], nleft, nright, res, userw, rw);
+            bool ok = est(y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw);
             if (!ok) {
                 ys[i - 1] = y[i - 1];
             }
@@ -155,21 +155,21 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
 
     if (newnj != 1) {
         for (size_t i = 1; i <= n - newnj; i += newnj) {
-            T delta = (ys[i + newnj - 1] - ys[i - 1]) / ((T) newnj);
+            T delta = (ys[i + newnj - 1] - ys[i - 1]) / static_cast<T>(newnj);
             for (size_t j = i + 1; j <= i + newnj - 1; j++) {
-                ys[j - 1] = ys[i - 1] + delta * ((T) (j - i));
+                ys[j - 1] = ys[i - 1] + delta * static_cast<T>(j - i);
             }
         }
         size_t k = ((n - 1) / newnj) * newnj + 1;
         if (k != n) {
-            bool ok = est(y, n, len, ideg, (T) n, &ys[n - 1], nleft, nright, res, userw, rw);
+            bool ok = est(y, n, len, ideg, static_cast<T>(n), &ys[n - 1], nleft, nright, res, userw, rw);
             if (!ok) {
                 ys[n - 1] = y[n - 1];
             }
             if (k != n - 1) {
-                T delta = (ys[n - 1] - ys[k - 1]) / ((T) (n - k));
+                T delta = (ys[n - 1] - ys[k - 1]) / static_cast<T>(n - k);
                 for (size_t j = k + 1; j <= n - 1; j++) {
-                    ys[j - 1] = ys[k - 1] + delta * ((T) (j - k));
+                    ys[j - 1] = ys[k - 1] + delta * static_cast<T>(j - k);
                 }
             }
         }
@@ -179,7 +179,7 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
 template<typename T>
 void ma(const std::vector<T>& x, size_t n, size_t len, std::vector<T>& ave) {
     size_t newn = n - len + 1;
-    double flen = (T) len;
+    double flen = static_cast<double>(len);
     double v = 0.0;
 
     // get the first average
@@ -187,14 +187,14 @@ void ma(const std::vector<T>& x, size_t n, size_t len, std::vector<T>& ave) {
         v += x[i];
     }
 
-    ave[0] = (T) (v / flen);
+    ave[0] = static_cast<T>(v / flen);
     if (newn > 1) {
         size_t k = len;
         size_t m = 0;
         for (size_t j = 1; j < newn; j++) {
             // window down the array
             v = v - x[m] + x[k];
-            ave[j] = (T) (v / flen);
+            ave[j] = static_cast<T>(v / flen);
             k += 1;
             m += 1;
         }
@@ -220,16 +220,16 @@ void rwts(const T* y, size_t n, const std::vector<T>& fit, std::vector<T>& rw) {
     // sort
     std::sort(rw.begin(), rw.begin() + n);
 
-    T cmad = 3.0 * (rw[mid1] + rw[mid2]); // 6 * median abs resid
-    T c9 = 0.999 * cmad;
-    T c1 = 0.001 * cmad;
+    T cmad = static_cast<T>(3.0) * (rw[mid1] + rw[mid2]); // 6 * median abs resid
+    T c9 = static_cast<T>(0.999) * cmad;
+    T c1 = static_cast<T>(0.001) * cmad;
 
     for (size_t i = 0; i < n; i++) {
         T r = std::abs(y[i] - fit[i]);
         if (r <= c1) {
             rw[i] = 1.0;
         } else if (r <= c9) {
-            rw[i] = (T) std::pow(1.0 - std::pow(r / cmad, 2), 2);
+            rw[i] = static_cast<T>(std::pow(1.0 - std::pow(r / cmad, 2.0), 2.0));
         } else {
             rw[i] = 0.0;
         }
@@ -672,7 +672,7 @@ std::vector<T> box_cox(const T* y, size_t y_size, float lambda) {
     res.reserve(y_size);
     if (lambda != 0.0) {
         for (size_t i = 0; i < y_size; i++) {
-            res.push_back((T) (std::pow(y[i], lambda) - 1.0) / lambda);
+            res.push_back(static_cast<T>(std::pow(y[i], lambda) - 1.0) / lambda);
         }
     } else {
         for (size_t i = 0; i < y_size; i++) {
