@@ -256,7 +256,7 @@ void ss(const std::vector<T>& y, size_t n, size_t np, size_t ns, int isdeg, size
         if (!ok) {
             work2[0] = work2[1];
         }
-        xs = k + 1;
+        xs = static_cast<T>(k + 1);
         size_t nleft = static_cast<size_t>(std::max(1, static_cast<int>(k) - static_cast<int>(ns) + 1));
         ok = est(work1, k, ns, isdeg, xs, &work2[k + 1], nleft, k, work4, userw, work3);
         if (!ok) {
@@ -354,13 +354,13 @@ void stl(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int i
 
 template<typename T>
 double var(const std::vector<T>& series) {
-    double mean = std::accumulate(series.begin(), series.end(), 0.0) / series.size();
+    double mean = std::accumulate(series.begin(), series.end(), 0.0) / static_cast<double>(series.size());
     double sum = 0.0;
     for (auto v : series) {
         double diff = v - mean;
         sum += diff * diff;
     }
-    return sum / (series.size() - 1);
+    return sum / static_cast<double>(series.size() - 1);
 }
 
 template<typename T>
@@ -543,7 +543,7 @@ StlResult<T> StlParams::fit(const T* series, size_t series_size, size_t period) 
     }
 
     size_t newnp = std::max(np, static_cast<size_t>(2));
-    size_t nt = static_cast<size_t>(std::ceil((1.5 * newnp) / (1.0 - 1.5 / static_cast<float>(newns))));
+    size_t nt = static_cast<size_t>(std::ceil((1.5 * static_cast<float>(newnp)) / (1.0 - 1.5 / static_cast<float>(newns))));
     nt = this->nt_.value_or(nt);
     nt = std::max(nt, static_cast<size_t>(3));
     if (nt % 2 == 0) {

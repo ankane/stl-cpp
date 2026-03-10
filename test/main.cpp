@@ -59,7 +59,7 @@ template<typename T>
 std::vector<T> max_seasonal_series() {
     std::vector<T> series;
     for (size_t i = 0; i < 30; i++) {
-        series.push_back(i % 7);
+        series.push_back(static_cast<T>(i % 7));
     }
     return series;
 }
@@ -68,7 +68,7 @@ template<typename T>
 std::vector<T> max_trend_series() {
     std::vector<T> series;
     for (size_t i = 0; i < 30; i++) {
-        series.push_back(i);
+        series.push_back(static_cast<T>(i));
     }
     return series;
 }
