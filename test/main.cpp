@@ -1,9 +1,11 @@
-#include <algorithm>
 #include <cassert>
+#include <cmath>
+#include <cstddef>
 #include <cstring>
 #include <iostream>
 #include <ranges>
 #include <span>
+#include <stdexcept>
 #include <vector>
 
 #include "../include/stl.hpp"
@@ -26,7 +28,7 @@ void print_vector(const std::vector<T>& x) {
 }
 
 template<typename T>
-std::vector<T> first(const std::vector<T>& x, ssize_t n) {
+std::vector<T> first(const std::vector<T>& x, ptrdiff_t n) {
     auto view = std::views::take(x, n);
     return std::vector<T>(view.begin(), view.end());
 }
