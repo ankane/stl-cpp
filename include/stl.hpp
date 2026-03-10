@@ -48,18 +48,18 @@ bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, s
     // compute weights
     T a = 0.0;
     for (size_t j = nleft; j <= nright; j++) {
-        w[j - 1] = 0.0;
+        w.at(j - 1) = 0.0;
         T r = std::abs(static_cast<T>(j) - xs);
         if (r <= h9) {
             if (r <= h1) {
-                w[j - 1] = 1.0;
+                w.at(j - 1) = 1.0;
             } else {
-                w[j - 1] = static_cast<T>(std::pow(1.0 - std::pow(r / h, 3.0), 3.0));
+                w.at(j - 1) = static_cast<T>(std::pow(1.0 - std::pow(r / h, 3.0), 3.0));
             }
             if (userw) {
-                w[j - 1] *= rw[j - 1];
+                w.at(j - 1) *= rw.at(j - 1);
             }
-            a += w[j - 1];
+            a += w.at(j - 1);
         }
     }
 
@@ -67,32 +67,32 @@ bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, s
         return false;
     } else { // weighted least squares
         for (size_t j = nleft; j <= nright; j++) { // make sum of w(j) == 1
-            w[j - 1] /= static_cast<T>(a);
+            w.at(j - 1) /= static_cast<T>(a);
         }
 
         if (h > 0.0 && ideg > 0) { // use linear fit
             T a = 0.0;
             for (size_t j = nleft; j <= nright; j++) { // weighted center of x values
-                a += w[j - 1] * static_cast<T>(j);
+                a += w.at(j - 1) * static_cast<T>(j);
             }
             T b = xs - a;
             T c = 0.0;
             for (size_t j = nleft; j <= nright; j++) {
-                c += w[j - 1] * std::pow(static_cast<T>(j) - a, static_cast<T>(2.0));
+                c += w.at(j - 1) * std::pow(static_cast<T>(j) - a, static_cast<T>(2.0));
             }
             if (std::sqrt(c) > 0.001 * range) {
                 b /= c;
 
                 // points are spread out enough to compute slope
                 for (size_t j = nleft; j <= nright; j++) {
-                    w[j - 1] *= b * (static_cast<T>(j) - a) + static_cast<T>(1.0);
+                    w.at(j - 1) *= b * (static_cast<T>(j) - a) + static_cast<T>(1.0);
                 }
             }
         }
 
         *ys = 0.0;
         for (size_t j = nleft; j <= nright; j++) {
-            *ys += w[j - 1] * y[j - 1];
+            *ys += w.at(j - 1) * y.at(j - 1);
         }
 
         return true;
@@ -102,7 +102,7 @@ bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, s
 template<typename T>
 void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, bool userw, const std::vector<T>& rw, T* ys, std::vector<T>& res) {
     if (n < 2) {
-        ys[0] = y[0];
+        ys[0] = y.at(0);
         return;
     }
 
@@ -116,7 +116,7 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
         for (size_t i = 1; i <= n; i += newnj) {
             bool ok = est(y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw);
             if (!ok) {
-                ys[i - 1] = y[i - 1];
+                ys[i - 1] = y.at(i - 1);
             }
         }
     } else if (newnj == 1) { // newnj equal to one, len less than n
@@ -130,7 +130,7 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
             }
             bool ok = est(y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw);
             if (!ok) {
-                ys[i - 1] = y[i - 1];
+                ys[i - 1] = y.at(i - 1);
             }
         }
     } else { // newnj greater than one, len less than n
@@ -148,7 +148,7 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
             }
             bool ok = est(y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw);
             if (!ok) {
-                ys[i - 1] = y[i - 1];
+                ys[i - 1] = y.at(i - 1);
             }
         }
     }
@@ -164,7 +164,7 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
         if (k != n) {
             bool ok = est(y, n, len, ideg, static_cast<T>(n), &ys[n - 1], nleft, nright, res, userw, rw);
             if (!ok) {
-                ys[n - 1] = y[n - 1];
+                ys[n - 1] = y.at(n - 1);
             }
             if (k != n - 1) {
                 T delta = (ys[n - 1] - ys[k - 1]) / static_cast<T>(n - k);
@@ -184,17 +184,17 @@ void ma(const std::vector<T>& x, size_t n, size_t len, std::vector<T>& ave) {
 
     // get the first average
     for (size_t i = 0; i < len; i++) {
-        v += x[i];
+        v += x.at(i);
     }
 
-    ave[0] = static_cast<T>(v / flen);
+    ave.at(0) = static_cast<T>(v / flen);
     if (newn > 1) {
         size_t k = len;
         size_t m = 0;
         for (size_t j = 1; j < newn; j++) {
             // window down the array
-            v = v - x[m] + x[k];
-            ave[j] = static_cast<T>(v / flen);
+            v = v - x.at(m) + x.at(k);
+            ave.at(j) = static_cast<T>(v / flen);
             k += 1;
             m += 1;
         }
@@ -211,7 +211,7 @@ void fts(const std::vector<T>& x, size_t n, size_t np, std::vector<T>& trend, st
 template<typename T>
 void rwts(const T* y, size_t n, const std::vector<T>& fit, std::vector<T>& rw) {
     for (size_t i = 0; i < n; i++) {
-        rw[i] = std::abs(y[i] - fit[i]);
+        rw.at(i) = std::abs(y[i] - fit.at(i));
     }
 
     size_t mid1 = (n - 1) / 2;
@@ -220,18 +220,18 @@ void rwts(const T* y, size_t n, const std::vector<T>& fit, std::vector<T>& rw) {
     // sort
     std::sort(rw.begin(), rw.begin() + n);
 
-    T cmad = static_cast<T>(3.0) * (rw[mid1] + rw[mid2]); // 6 * median abs resid
+    T cmad = static_cast<T>(3.0) * (rw.at(mid1) + rw.at(mid2)); // 6 * median abs resid
     T c9 = static_cast<T>(0.999) * cmad;
     T c1 = static_cast<T>(0.001) * cmad;
 
     for (size_t i = 0; i < n; i++) {
-        T r = std::abs(y[i] - fit[i]);
+        T r = std::abs(y[i] - fit.at(i));
         if (r <= c1) {
-            rw[i] = 1.0;
+            rw.at(i) = 1.0;
         } else if (r <= c9) {
-            rw[i] = static_cast<T>(std::pow(1.0 - std::pow(r / cmad, 2.0), 2.0));
+            rw.at(i) = static_cast<T>(std::pow(1.0 - std::pow(r / cmad, 2.0), 2.0));
         } else {
-            rw[i] = 0.0;
+            rw.at(i) = 0.0;
         }
     }
 }
@@ -242,28 +242,28 @@ void ss(const std::vector<T>& y, size_t n, size_t np, size_t ns, int isdeg, size
         size_t k = (n - j) / np + 1;
 
         for (size_t i = 1; i <= k; i++) {
-            work1[i - 1] = y[(i - 1) * np + j - 1];
+            work1.at(i - 1) = y.at((i - 1) * np + j - 1);
         }
         if (userw) {
             for (size_t i = 1; i <= k; i++) {
-                work3[i - 1] = rw[(i - 1) * np + j - 1];
+                work3.at(i - 1) = rw.at((i - 1) * np + j - 1);
             }
         }
         ess(work1, k, ns, isdeg, nsjump, userw, work3, work2.data() + 1, work4);
         T xs = 0.0;
         size_t nright = std::min(ns, k);
-        bool ok = est(work1, k, ns, isdeg, xs, &work2[0], 1, nright, work4, userw, work3);
+        bool ok = est(work1, k, ns, isdeg, xs, &work2.at(0), 1, nright, work4, userw, work3);
         if (!ok) {
-            work2[0] = work2[1];
+            work2.at(0) = work2.at(1);
         }
         xs = static_cast<T>(k + 1);
         size_t nleft = static_cast<size_t>(std::max(1, static_cast<int>(k) - static_cast<int>(ns) + 1));
-        ok = est(work1, k, ns, isdeg, xs, &work2[k + 1], nleft, k, work4, userw, work3);
+        ok = est(work1, k, ns, isdeg, xs, &work2.at(k + 1), nleft, k, work4, userw, work3);
         if (!ok) {
-            work2[k + 1] = work2[k];
+            work2.at(k + 1) = work2.at(k);
         }
         for (size_t m = 1; m <= k + 2; m++) {
-            season[(m - 1) * np + j - 1] = work2[m - 1];
+            season.at((m - 1) * np + j - 1) = work2.at(m - 1);
         }
     }
 }
@@ -272,17 +272,17 @@ template<typename T>
 void onestp(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int isdeg, int itdeg, int ildeg, size_t nsjump, size_t ntjump, size_t nljump, size_t ni, bool userw, std::vector<T>& rw, std::vector<T>& season, std::vector<T>& trend, std::vector<T>& work1, std::vector<T>& work2, std::vector<T>& work3, std::vector<T>& work4, std::vector<T>& work5) {
     for (size_t j = 0; j < ni; j++) {
         for (size_t i = 0; i < n; i++) {
-            work1[i] = y[i] - trend[i];
+            work1.at(i) = y[i] - trend.at(i);
         }
 
         ss(work1, n, np, ns, isdeg, nsjump, userw, rw, work2, work3, work4, work5, season);
         fts(work2, n + 2 * np, np, work3, work1);
         ess(work3, n, nl, ildeg, nljump, false, work4, work1.data(), work5);
         for (size_t i = 0; i < n; i++) {
-            season[i] = work2[np + i] - work1[i];
+            season.at(i) = work2.at(np + i) - work1.at(i);
         }
         for (size_t i = 0; i < n; i++) {
-            work1[i] = y[i] - season[i];
+            work1.at(i) = y[i] - season.at(i);
         }
         ess(work1, n, nt, itdeg, ntjump, userw, rw, trend.data(), work3);
     }
@@ -339,7 +339,7 @@ void stl(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int i
             break;
         }
         for (size_t i = 0; i < n; i++) {
-            work1[i] = trend[i] + season[i];
+            work1.at(i) = trend.at(i) + season.at(i);
         }
         rwts(y, n, work1, rw);
         userw = true;
@@ -347,7 +347,7 @@ void stl(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int i
 
     if (no <= 0) {
         for (size_t i = 0; i < n; i++) {
-            rw[i] = 1.0;
+            rw.at(i) = 1.0;
         }
     }
 }
@@ -368,7 +368,7 @@ double strength(const std::vector<T>& component, const std::vector<T>& remainder
     std::vector<T> sr;
     sr.reserve(remainder.size());
     for (size_t i = 0; i < remainder.size(); i++) {
-        sr.push_back(component[i] + remainder[i]);
+        sr.push_back(component.at(i) + remainder.at(i));
     }
     return std::max(0.0, 1.0 - var(remainder) / var(sr));
 }
@@ -566,7 +566,7 @@ StlResult<T> StlParams::fit(const T* series, size_t series_size, size_t period) 
 
     res.remainder.reserve(n);
     for (size_t i = 0; i < n; i++) {
-        res.remainder.push_back(y[i] - res.seasonal[i] - res.trend[i]);
+        res.remainder.push_back(y[i] - res.seasonal.at(i) - res.trend.at(i));
     }
 
     return res;
@@ -720,18 +720,18 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
 
         for (size_t j = 0; j < iterate; j++) {
             for (size_t i = 0; i < indices.size(); i++) {
-                size_t idx = indices[i];
+                size_t idx = indices.at(i);
 
                 if (j > 0) {
                     for (size_t ii = 0; ii < deseas.size(); ii++) {
-                        deseas[ii] += seasonality[idx][ii];
+                        deseas.at(ii) += seasonality.at(idx).at(ii);
                     }
                 }
 
                 StlResult<T> fit;
                 if (swin) {
                     StlParams clone = stl_params;
-                    fit = clone.seasonal_length((*swin)[idx]).fit(deseas, seas_ids[idx]);
+                    fit = clone.seasonal_length(swin.value().at(idx)).fit(deseas, seas_ids[idx]);
                 } else if (stl_params.ns_.has_value()) {
                     fit = stl_params.fit(deseas, seas_ids[idx]);
                 } else {
@@ -739,11 +739,11 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
                     fit = clone.seasonal_length(7 + 4 * (i + 1)).fit(deseas, seas_ids[idx]);
                 }
 
-                seasonality[idx] = fit.seasonal;
+                seasonality.at(idx) = fit.seasonal;
                 trend = fit.trend;
 
                 for (size_t ii = 0; ii < deseas.size(); ii++) {
-                    deseas[ii] -= seasonality[idx][ii];
+                    deseas.at(ii) -= seasonality.at(idx).at(ii);
                 }
             }
         }
@@ -755,7 +755,7 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
     std::vector<T> remainder;
     remainder.reserve(k);
     for (size_t i = 0; i < k; i++) {
-        remainder.push_back(deseas[i] - trend[i]);
+        remainder.push_back(deseas.at(i) - trend.at(i));
     }
 
     return std::make_tuple(trend, remainder, seasonality);
