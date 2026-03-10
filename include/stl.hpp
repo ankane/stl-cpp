@@ -67,7 +67,7 @@ bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, s
         return false;
     } else { // weighted least squares
         for (size_t j = nleft; j <= nright; j++) { // make sum of w(j) == 1
-            w.at(j - 1) /= static_cast<T>(a);
+            w.at(j - 1) /= a;
         }
 
         if (h > 0.0 && ideg > 0) { // use linear fit
