@@ -516,51 +516,51 @@ inline StlParams params() {
 
 template<typename T>
 StlResult<T> StlParams::fit(const T* series, size_t series_size, size_t period) const {
-    auto y = series;
-    auto np = period;
-    auto n = series_size;
+    const T* y = series;
+    size_t np = period;
+    size_t n = series_size;
 
     if (n < 2 * np) {
         throw std::invalid_argument("series has less than two periods");
     }
 
-    auto ns = this->ns_.value_or(np);
+    size_t ns = this->ns_.value_or(np);
 
-    auto isdeg = this->isdeg_;
-    auto itdeg = this->itdeg_;
+    int isdeg = this->isdeg_;
+    int itdeg = this->itdeg_;
 
-    auto res = StlResult<T> {
+    StlResult<T> res{
         std::vector<T>(n),
         std::vector<T>(n),
         std::vector<T>(),
         std::vector<T>(n)
     };
 
-    auto ildeg = this->ildeg_.value_or(itdeg);
-    auto newns = std::max(ns, static_cast<size_t>(3));
+    int ildeg = this->ildeg_.value_or(itdeg);
+    size_t newns = std::max(ns, static_cast<size_t>(3));
     if (newns % 2 == 0) {
         newns += 1;
     }
 
-    auto newnp = std::max(np, static_cast<size_t>(2));
-    auto nt = static_cast<size_t>(std::ceil((1.5 * newnp) / (1.0 - 1.5 / static_cast<float>(newns))));
+    size_t newnp = std::max(np, static_cast<size_t>(2));
+    size_t nt = static_cast<size_t>(std::ceil((1.5 * newnp) / (1.0 - 1.5 / static_cast<float>(newns))));
     nt = this->nt_.value_or(nt);
     nt = std::max(nt, static_cast<size_t>(3));
     if (nt % 2 == 0) {
         nt += 1;
     }
 
-    auto nl = this->nl_.value_or(newnp);
+    size_t nl = this->nl_.value_or(newnp);
     if (nl % 2 == 0 && !this->nl_.has_value()) {
         nl += 1;
     }
 
-    auto ni = this->ni_.value_or(this->robust_ ? 1 : 2);
-    auto no = this->no_.value_or(this->robust_ ? 15 : 0);
+    size_t ni = this->ni_.value_or(this->robust_ ? 1 : 2);
+    size_t no = this->no_.value_or(this->robust_ ? 15 : 0);
 
-    auto nsjump = this->nsjump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(newns) / 10.0)));
-    auto ntjump = this->ntjump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nt) / 10.0)));
-    auto nljump = this->nljump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nl) / 10.0)));
+    size_t nsjump = this->nsjump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(newns) / 10.0)));
+    size_t ntjump = this->ntjump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nt) / 10.0)));
+    size_t nljump = this->nljump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nl) / 10.0)));
 
     detail::stl(y, n, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, res.weights, res.seasonal, res.trend);
 
@@ -711,7 +711,7 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
     seasonality.reserve(seas_size);
     std::vector<T> trend;
 
-    auto deseas = lambda.has_value() ? box_cox(x, k, lambda.value()) : std::vector<T>(x, x + k);
+    std::vector<T> deseas = lambda.has_value() ? box_cox(x, k, lambda.value()) : std::vector<T>(x, x + k);
 
     if (seas_size != 0) {
         for (size_t i = 0; i < seas_size; i++) {
@@ -782,14 +782,14 @@ MstlResult<T> MstlParams::fit(const T* series, size_t series_size, const size_t*
     }
 
     if (lambda_.has_value()) {
-        auto lambda = lambda_.value();
+        float lambda = lambda_.value();
         if (lambda < 0 || lambda > 1) {
             throw std::invalid_argument("lambda must be between 0 and 1");
         }
     }
 
     if (swin_.has_value()) {
-        auto swin = swin_.value();
+        const std::vector<size_t>& swin = swin_.value();
         if (swin.size() != periods_size) {
             throw std::invalid_argument("seasonal_lengths must have the same length as periods");
         }
