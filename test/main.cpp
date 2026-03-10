@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cstring>
 #include <iostream>
+#include <ranges>
 #include <span>
 #include <vector>
 
@@ -26,8 +27,8 @@ void print_vector(const std::vector<T>& x) {
 
 template<typename T>
 std::vector<T> first(const std::vector<T>& x, size_t n) {
-    n = std::min(n, x.size());
-    return std::vector<T>(x.begin(), x.begin() + (ptrdiff_t) n);
+    auto view = std::views::take(x, n);
+    return std::vector<T>(view.begin(), view.end());
 }
 
 void assert_in_delta(double exp, double act) {
