@@ -1,3 +1,7 @@
+## 0.3.0 (unreleased)
+
+- Dropped support for C++17
+
 ## 0.2.0 (2025-02-23)
 
 - Added support for MSTL

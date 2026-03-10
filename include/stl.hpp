@@ -21,13 +21,10 @@
 #include <cstddef>
 #include <numeric>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <tuple>
 #include <vector>
-
-#if __cplusplus >= 202002L
-#include <span>
-#endif
 
 namespace stl {
 
@@ -209,7 +206,9 @@ void fts(const std::vector<T>& x, size_t n, size_t np, std::vector<T>& trend, st
 }
 
 template<typename T>
-void rwts(const T* y, size_t n, const std::vector<T>& fit, std::vector<T>& rw) {
+void rwts(std::span<const T> y, const std::vector<T>& fit, std::vector<T>& rw) {
+    size_t n = y.size();
+
     for (size_t i = 0; i < n; i++) {
         rw.at(i) = std::abs(y[i] - fit.at(i));
     }
@@ -270,7 +269,9 @@ void ss(const std::vector<T>& y, size_t n, size_t np, size_t ns, int isdeg, size
 }
 
 template<typename T>
-void onestp(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int isdeg, int itdeg, int ildeg, size_t nsjump, size_t ntjump, size_t nljump, size_t ni, bool userw, std::vector<T>& rw, std::vector<T>& season, std::vector<T>& trend, std::vector<T>& work1, std::vector<T>& work2, std::vector<T>& work3, std::vector<T>& work4, std::vector<T>& work5) {
+void onestp(std::span<const T> y, size_t np, size_t ns, size_t nt, size_t nl, int isdeg, int itdeg, int ildeg, size_t nsjump, size_t ntjump, size_t nljump, size_t ni, bool userw, std::vector<T>& rw, std::vector<T>& season, std::vector<T>& trend, std::vector<T>& work1, std::vector<T>& work2, std::vector<T>& work3, std::vector<T>& work4, std::vector<T>& work5) {
+    size_t n = y.size();
+
     for (size_t j = 0; j < ni; j++) {
         for (size_t i = 0; i < n; i++) {
             work1.at(i) = y[i] - trend.at(i);
@@ -290,7 +291,9 @@ void onestp(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, in
 }
 
 template<typename T>
-void stl(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int isdeg, int itdeg, int ildeg, size_t nsjump, size_t ntjump, size_t nljump, size_t ni, size_t no, std::vector<T>& rw, std::vector<T>& season, std::vector<T>& trend) {
+void stl(std::span<const T> y, size_t np, size_t ns, size_t nt, size_t nl, int isdeg, int itdeg, int ildeg, size_t nsjump, size_t ntjump, size_t nljump, size_t ni, size_t no, std::vector<T>& rw, std::vector<T>& season, std::vector<T>& trend) {
+    size_t n = y.size();
+
     if (ns < 3) {
         throw std::invalid_argument("seasonal_length must be at least 3");
     }
@@ -334,7 +337,7 @@ void stl(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int i
     size_t k = 0;
 
     while (true) {
-        onestp(y, n, np, ns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, userw, rw, season, trend, work1, work2, work3, work4, work5);
+        onestp(y, np, ns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, userw, rw, season, trend, work1, work2, work3, work4, work5);
         k += 1;
         if (k > no) {
             break;
@@ -342,7 +345,7 @@ void stl(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int i
         for (size_t i = 0; i < n; i++) {
             work1.at(i) = trend.at(i) + season.at(i);
         }
-        rwts(y, n, work1, rw);
+        rwts(y, work1, rw);
         userw = true;
     }
 
@@ -495,19 +498,13 @@ class StlParams {
         return *this;
     }
 
-    /// Decomposes a time series from an array.
-    template<typename T>
-    StlResult<T> fit(const T* series, size_t series_size, size_t period) const;
-
     /// Decomposes a time series from a vector.
     template<typename T>
     StlResult<T> fit(const std::vector<T>& series, size_t period) const;
 
-#if __cplusplus >= 202002L
     /// Decomposes a time series from a span.
     template<typename T>
     StlResult<T> fit(std::span<const T> series, size_t period) const;
-#endif
 };
 
 /// Creates a new set of STL parameters.
@@ -516,10 +513,10 @@ inline StlParams params() {
 }
 
 template<typename T>
-StlResult<T> StlParams::fit(const T* series, size_t series_size, size_t period) const {
-    const T* y = series;
+StlResult<T> StlParams::fit(std::span<const T> series, size_t period) const {
+    std::span<const T> y = series;
     size_t np = period;
-    size_t n = series_size;
+    size_t n = series.size();
 
     if (n < 2 * np) {
         throw std::invalid_argument("series has less than two periods");
@@ -563,7 +560,7 @@ StlResult<T> StlParams::fit(const T* series, size_t series_size, size_t period) 
     size_t ntjump = this->ntjump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nt) / 10.0)));
     size_t nljump = this->nljump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nl) / 10.0)));
 
-    detail::stl(y, n, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, res.weights, res.seasonal, res.trend);
+    detail::stl(y, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, res.weights, res.seasonal, res.trend);
 
     res.remainder.reserve(n);
     for (size_t i = 0; i < n; i++) {
@@ -575,15 +572,8 @@ StlResult<T> StlParams::fit(const T* series, size_t series_size, size_t period) 
 
 template<typename T>
 StlResult<T> StlParams::fit(const std::vector<T>& series, size_t period) const {
-    return StlParams::fit(series.data(), series.size(), period);
+    return StlParams::fit(std::span{series}, period);
 }
-
-#if __cplusplus >= 202002L
-template<typename T>
-StlResult<T> StlParams::fit(std::span<const T> series, size_t period) const {
-    return StlParams::fit(series.data(), series.size(), period);
-}
-#endif
 
 /// A MSTL result.
 template<typename T = float>
@@ -645,19 +635,13 @@ class MstlParams {
         return *this;
     }
 
-    /// Decomposes a time series from an array.
-    template<typename T>
-    MstlResult<T> fit(const T* series, size_t series_size, const size_t* periods, size_t periods_size) const;
-
     /// Decomposes a time series from a vector.
     template<typename T>
     MstlResult<T> fit(const std::vector<T>& series, const std::vector<size_t>& periods) const;
 
-#if __cplusplus >= 202002L
     /// Decomposes a time series from a span.
     template<typename T>
     MstlResult<T> fit(std::span<const T> series, std::span<const size_t> periods) const;
-#endif
 };
 
 /// Creates a new set of MSTL parameters.
@@ -668,15 +652,15 @@ inline MstlParams mstl_params() {
 namespace detail {
 
 template<typename T>
-std::vector<T> box_cox(const T* y, size_t y_size, float lambda) {
+std::vector<T> box_cox(std::span<const T> y, float lambda) {
     std::vector<T> res;
-    res.reserve(y_size);
+    res.reserve(y.size());
     if (lambda != 0.0) {
-        for (size_t i = 0; i < y_size; i++) {
+        for (size_t i = 0; i < y.size(); i++) {
             res.push_back(static_cast<T>(std::pow(y[i], lambda) - 1.0) / lambda);
         }
     } else {
-        for (size_t i = 0; i < y_size; i++) {
+        for (size_t i = 0; i < y.size(); i++) {
             res.push_back(std::log(y[i]));
         }
     }
@@ -685,10 +669,8 @@ std::vector<T> box_cox(const T* y, size_t y_size, float lambda) {
 
 template<typename T>
 std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
-    const T* x,
-    size_t k,
-    const size_t* seas_ids,
-    size_t seas_size,
+    std::span<const T> x,
+    std::span<const size_t> seas_ids,
     size_t iterate,
     std::optional<float> lambda,
     const std::optional<std::vector<size_t>>& swin,
@@ -697,25 +679,25 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
     // keep track of indices instead of sorting seas_ids
     // so order is preserved with seasonality
     std::vector<size_t> indices;
-    for (size_t i = 0; i < seas_size; i++) {
+    for (size_t i = 0; i < seas_ids.size(); i++) {
         indices.push_back(i);
     }
     std::sort(indices.begin(), indices.end(), [&seas_ids](size_t a, size_t b) {
         return seas_ids[a] < seas_ids[b];
     });
 
-    if (seas_size == 1) {
+    if (seas_ids.size() == 1) {
         iterate = 1;
     }
 
     std::vector<std::vector<T>> seasonality;
-    seasonality.reserve(seas_size);
+    seasonality.reserve(seas_ids.size());
     std::vector<T> trend;
 
-    std::vector<T> deseas = lambda.has_value() ? box_cox(x, k, lambda.value()) : std::vector<T>(x, x + k);
+    std::vector<T> deseas = lambda.has_value() ? box_cox(x, lambda.value()) : std::vector<T>(x.begin(), x.end());
 
-    if (seas_size != 0) {
-        for (size_t i = 0; i < seas_size; i++) {
+    if (seas_ids.size() != 0) {
+        for (size_t i = 0; i < seas_ids.size(); i++) {
             seasonality.push_back(std::vector<T>());
         }
 
@@ -754,8 +736,8 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
     }
 
     std::vector<T> remainder;
-    remainder.reserve(k);
-    for (size_t i = 0; i < k; i++) {
+    remainder.reserve(x.size());
+    for (size_t i = 0; i < x.size(); i++) {
         remainder.push_back(deseas.at(i) - trend.at(i));
     }
 
@@ -765,10 +747,10 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
 } // namespace detail
 
 template<typename T>
-MstlResult<T> MstlParams::fit(const T* series, size_t series_size, const size_t* periods, size_t periods_size) const {
+MstlResult<T> MstlParams::fit(std::span<const T> series, std::span<const size_t> periods) const {
     // return error to be consistent with stl
     // and ensure seasonal is always same length as periods
-    for (size_t i = 0; i < periods_size; i++) {
+    for (size_t i = 0; i < periods.size(); i++) {
         if (periods[i] < 2) {
             throw std::invalid_argument("periods must be at least 2");
         }
@@ -776,8 +758,8 @@ MstlResult<T> MstlParams::fit(const T* series, size_t series_size, const size_t*
 
     // return error to be consistent with stl
     // and ensure seasonal is always same length as periods
-    for (size_t i = 0; i < periods_size; i++) {
-        if (series_size < periods[i] * 2) {
+    for (size_t i = 0; i < periods.size(); i++) {
+        if (series.size() < periods[i] * 2) {
             throw std::invalid_argument("series has less than two periods");
         }
     }
@@ -791,16 +773,14 @@ MstlResult<T> MstlParams::fit(const T* series, size_t series_size, const size_t*
 
     if (swin_.has_value()) {
         const std::vector<size_t>& swin = swin_.value();
-        if (swin.size() != periods_size) {
+        if (swin.size() != periods.size()) {
             throw std::invalid_argument("seasonal_lengths must have the same length as periods");
         }
     }
 
     auto [trend, remainder, seasonal] = detail::mstl(
         series,
-        series_size,
         periods,
-        periods_size,
         iterate_,
         lambda_,
         swin_,
@@ -816,14 +796,7 @@ MstlResult<T> MstlParams::fit(const T* series, size_t series_size, const size_t*
 
 template<typename T>
 MstlResult<T> MstlParams::fit(const std::vector<T>& series, const std::vector<size_t>& periods) const {
-    return MstlParams::fit(series.data(), series.size(), periods.data(), periods.size());
+    return MstlParams::fit(std::span{series}, std::span{periods});
 }
-
-#if __cplusplus >= 202002L
-template<typename T>
-MstlResult<T> MstlParams::fit(std::span<const T> series, std::span<const size_t> periods) const {
-    return MstlParams::fit(series.data(), series.size(), periods.data(), periods.size());
-}
-#endif
 
 } // namespace stl
