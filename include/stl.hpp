@@ -35,21 +35,21 @@ namespace detail {
 
 template<typename T>
 bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, size_t nleft, size_t nright, std::vector<T>& w, bool userw, const std::vector<T>& rw) {
-    auto range = ((T) n) - 1.0;
-    auto h = std::max(xs - ((T) nleft), ((T) nright) - xs);
+    T range = ((T) n) - 1.0;
+    T h = std::max(xs - ((T) nleft), ((T) nright) - xs);
 
     if (len > n) {
         h += (T) ((len - n) / 2);
     }
 
-    auto h9 = 0.999 * h;
-    auto h1 = 0.001 * h;
+    T h9 = 0.999 * h;
+    T h1 = 0.001 * h;
 
     // compute weights
-    auto a = 0.0;
-    for (auto j = nleft; j <= nright; j++) {
+    T a = 0.0;
+    for (size_t j = nleft; j <= nright; j++) {
         w[j - 1] = 0.0;
-        auto r = std::abs(((T) j) - xs);
+        T r = std::abs(((T) j) - xs);
         if (r <= h9) {
             if (r <= h1) {
                 w[j - 1] = 1.0;
@@ -66,32 +66,32 @@ bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, s
     if (a <= 0.0) {
         return false;
     } else { // weighted least squares
-        for (auto j = nleft; j <= nright; j++) { // make sum of w(j) == 1
+        for (size_t j = nleft; j <= nright; j++) { // make sum of w(j) == 1
             w[j - 1] /= (T) a;
         }
 
         if (h > 0.0 && ideg > 0) { // use linear fit
-            auto a = 0.0;
-            for (auto j = nleft; j <= nright; j++) { // weighted center of x values
+            T a = 0.0;
+            for (size_t j = nleft; j <= nright; j++) { // weighted center of x values
                 a += w[j - 1] * ((T) j);
             }
-            auto b = xs - a;
-            auto c = 0.0;
-            for (auto j = nleft; j <= nright; j++) {
+            T b = xs - a;
+            T c = 0.0;
+            for (size_t j = nleft; j <= nright; j++) {
                 c += w[j - 1] * std::pow(((T) j) - a, 2);
             }
             if (std::sqrt(c) > 0.001 * range) {
                 b /= c;
 
                 // points are spread out enough to compute slope
-                for (auto j = nleft; j <= nright; j++) {
+                for (size_t j = nleft; j <= nright; j++) {
                     w[j - 1] *= (T) (b * (((T) j) - a) + 1.0);
                 }
             }
         }
 
         *ys = 0.0;
-        for (auto j = nleft; j <= nright; j++) {
+        for (size_t j = nleft; j <= nright; j++) {
             *ys += w[j - 1] * y[j - 1];
         }
 
@@ -109,18 +109,18 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
     size_t nleft = 0;
     size_t nright = 0;
 
-    auto newnj = std::min(njump, n - 1);
+    size_t newnj = std::min(njump, n - 1);
     if (len >= n) {
         nleft = 1;
         nright = n;
         for (size_t i = 1; i <= n; i += newnj) {
-            auto ok = est(y, n, len, ideg, (T) i, &ys[i - 1], nleft, nright, res, userw, rw);
+            bool ok = est(y, n, len, ideg, (T) i, &ys[i - 1], nleft, nright, res, userw, rw);
             if (!ok) {
                 ys[i - 1] = y[i - 1];
             }
         }
     } else if (newnj == 1) { // newnj equal to one, len less than n
-        auto nsh = (len + 1) / 2;
+        size_t nsh = (len + 1) / 2;
         nleft = 1;
         nright = len;
         for (size_t i = 1; i <= n; i++) { // fitted value at i
@@ -128,13 +128,13 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
                 nleft += 1;
                 nright += 1;
             }
-            auto ok = est(y, n, len, ideg, (T) i, &ys[i - 1], nleft, nright, res, userw, rw);
+            bool ok = est(y, n, len, ideg, (T) i, &ys[i - 1], nleft, nright, res, userw, rw);
             if (!ok) {
                 ys[i - 1] = y[i - 1];
             }
         }
     } else { // newnj greater than one, len less than n
-        auto nsh = (len + 1) / 2;
+        size_t nsh = (len + 1) / 2;
         for (size_t i = 1; i <= n; i += newnj) { // fitted value at i
             if (i < nsh) {
                 nleft = 1;
@@ -146,7 +146,7 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
                 nleft = i - nsh + 1;
                 nright = len + i - nsh;
             }
-            auto ok = est(y, n, len, ideg, (T) i, &ys[i - 1], nleft, nright, res, userw, rw);
+            bool ok = est(y, n, len, ideg, (T) i, &ys[i - 1], nleft, nright, res, userw, rw);
             if (!ok) {
                 ys[i - 1] = y[i - 1];
             }
@@ -155,20 +155,20 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
 
     if (newnj != 1) {
         for (size_t i = 1; i <= n - newnj; i += newnj) {
-            auto delta = (ys[i + newnj - 1] - ys[i - 1]) / ((T) newnj);
-            for (auto j = i + 1; j <= i + newnj - 1; j++) {
+            T delta = (ys[i + newnj - 1] - ys[i - 1]) / ((T) newnj);
+            for (size_t j = i + 1; j <= i + newnj - 1; j++) {
                 ys[j - 1] = ys[i - 1] + delta * ((T) (j - i));
             }
         }
-        auto k = ((n - 1) / newnj) * newnj + 1;
+        size_t k = ((n - 1) / newnj) * newnj + 1;
         if (k != n) {
-            auto ok = est(y, n, len, ideg, (T) n, &ys[n - 1], nleft, nright, res, userw, rw);
+            bool ok = est(y, n, len, ideg, (T) n, &ys[n - 1], nleft, nright, res, userw, rw);
             if (!ok) {
                 ys[n - 1] = y[n - 1];
             }
             if (k != n - 1) {
-                auto delta = (ys[n - 1] - ys[k - 1]) / ((T) (n - k));
-                for (auto j = k + 1; j <= n - 1; j++) {
+                T delta = (ys[n - 1] - ys[k - 1]) / ((T) (n - k));
+                for (size_t j = k + 1; j <= n - 1; j++) {
                     ys[j - 1] = ys[k - 1] + delta * ((T) (j - k));
                 }
             }
@@ -178,7 +178,7 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
 
 template<typename T>
 void ma(const std::vector<T>& x, size_t n, size_t len, std::vector<T>& ave) {
-    auto newn = n - len + 1;
+    size_t newn = n - len + 1;
     double flen = (T) len;
     double v = 0.0;
 
@@ -214,18 +214,18 @@ void rwts(const T* y, size_t n, const std::vector<T>& fit, std::vector<T>& rw) {
         rw[i] = std::abs(y[i] - fit[i]);
     }
 
-    auto mid1 = (n - 1) / 2;
-    auto mid2 = n / 2;
+    size_t mid1 = (n - 1) / 2;
+    size_t mid2 = n / 2;
 
     // sort
     std::sort(rw.begin(), rw.begin() + n);
 
-    auto cmad = 3.0 * (rw[mid1] + rw[mid2]); // 6 * median abs resid
-    auto c9 = 0.999 * cmad;
-    auto c1 = 0.001 * cmad;
+    T cmad = 3.0 * (rw[mid1] + rw[mid2]); // 6 * median abs resid
+    T c9 = 0.999 * cmad;
+    T c1 = 0.001 * cmad;
 
     for (size_t i = 0; i < n; i++) {
-        auto r = std::abs(y[i] - fit[i]);
+        T r = std::abs(y[i] - fit[i]);
         if (r <= c1) {
             rw[i] = 1.0;
         } else if (r <= c9) {
@@ -251,8 +251,8 @@ void ss(const std::vector<T>& y, size_t n, size_t np, size_t ns, int isdeg, size
         }
         ess(work1, k, ns, isdeg, nsjump, userw, work3, work2.data() + 1, work4);
         T xs = 0.0;
-        auto nright = std::min(ns, k);
-        auto ok = est(work1, k, ns, isdeg, xs, &work2[0], 1, nright, work4, userw, work3);
+        size_t nright = std::min(ns, k);
+        bool ok = est(work1, k, ns, isdeg, xs, &work2[0], 1, nright, work4, userw, work3);
         if (!ok) {
             work2[0] = work2[1];
         }
@@ -323,13 +323,13 @@ void stl(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int i
         throw std::invalid_argument("low_pass_length must be odd");
     }
 
-    auto work1 = std::vector<T>(n + 2 * np);
-    auto work2 = std::vector<T>(n + 2 * np);
-    auto work3 = std::vector<T>(n + 2 * np);
-    auto work4 = std::vector<T>(n + 2 * np);
-    auto work5 = std::vector<T>(n + 2 * np);
+    std::vector<T> work1(n + 2 * np);
+    std::vector<T> work2(n + 2 * np);
+    std::vector<T> work3(n + 2 * np);
+    std::vector<T> work4(n + 2 * np);
+    std::vector<T> work5(n + 2 * np);
 
-    auto userw = false;
+    bool userw = false;
     size_t k = 0;
 
     while (true) {
@@ -354,7 +354,7 @@ void stl(const T* y, size_t n, size_t np, size_t ns, size_t nt, size_t nl, int i
 
 template<typename T>
 double var(const std::vector<T>& series) {
-    auto mean = std::accumulate(series.begin(), series.end(), 0.0) / series.size();
+    double mean = std::accumulate(series.begin(), series.end(), 0.0) / series.size();
     double sum = 0.0;
     for (auto v : series) {
         double diff = v - mean;
@@ -600,7 +600,7 @@ class MstlResult {
     /// Returns the seasonal strength.
     inline std::vector<double> seasonal_strength() const {
         std::vector<double> res;
-        for (auto& s : seasonal) {
+        for (const auto& s : seasonal) {
             res.push_back(detail::strength(s, remainder));
         }
         return res;
@@ -720,7 +720,7 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
 
         for (size_t j = 0; j < iterate; j++) {
             for (size_t i = 0; i < indices.size(); i++) {
-                auto idx = indices[i];
+                size_t idx = indices[i];
 
                 if (j > 0) {
                     for (size_t ii = 0; ii < deseas.size(); ii++) {
