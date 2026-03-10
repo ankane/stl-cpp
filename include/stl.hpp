@@ -176,7 +176,7 @@ void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, 
 template<typename T>
 void ma(const std::vector<T>& x, size_t n, size_t len, std::vector<T>& ave) {
     size_t newn = n - len + 1;
-    double flen = static_cast<double>(len);
+    auto flen = static_cast<double>(len);
     double v = 0.0;
 
     // get the first average
@@ -509,7 +509,7 @@ class StlParams {
 
 /// Creates a new set of STL parameters.
 inline StlParams params() {
-    return StlParams();
+    return StlParams{};
 }
 
 template<typename T>
@@ -541,7 +541,7 @@ StlResult<T> StlParams::fit(std::span<const T> series, size_t period) const {
     }
 
     size_t newnp = std::max(np, static_cast<size_t>(2));
-    size_t nt = static_cast<size_t>(std::ceil((1.5 * static_cast<float>(newnp)) / (1.0 - 1.5 / static_cast<float>(newns))));
+    auto nt = static_cast<size_t>(std::ceil((1.5 * static_cast<float>(newnp)) / (1.0 - 1.5 / static_cast<float>(newns))));
     nt = this->nt_.value_or(nt);
     nt = std::max(nt, static_cast<size_t>(3));
     if (nt % 2 == 0) {
@@ -646,7 +646,7 @@ class MstlParams {
 
 /// Creates a new set of MSTL parameters.
 inline MstlParams mstl_params() {
-    return MstlParams();
+    return MstlParams{};
 }
 
 namespace detail {
@@ -750,16 +750,16 @@ template<typename T>
 MstlResult<T> MstlParams::fit(std::span<const T> series, std::span<const size_t> periods) const {
     // return error to be consistent with stl
     // and ensure seasonal is always same length as periods
-    for (size_t i = 0; i < periods.size(); i++) {
-        if (periods[i] < 2) {
+    for (auto v : periods) {
+        if (v < 2) {
             throw std::invalid_argument("periods must be at least 2");
         }
     }
 
     // return error to be consistent with stl
     // and ensure seasonal is always same length as periods
-    for (size_t i = 0; i < periods.size(); i++) {
-        if (series.size() < periods[i] * 2) {
+    for (auto v : periods) {
+        if (series.size() < v * 2) {
             throw std::invalid_argument("series has less than two periods");
         }
     }
