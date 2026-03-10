@@ -35,15 +35,15 @@ namespace detail {
 
 template<typename T>
 bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, size_t nleft, size_t nright, std::vector<T>& w, bool userw, const std::vector<T>& rw) {
-    T range = ((T) n) - 1.0;
+    T range = ((T) n) - static_cast<T>(1.0);
     T h = std::max(xs - ((T) nleft), ((T) nright) - xs);
 
     if (len > n) {
         h += (T) ((len - n) / 2);
     }
 
-    T h9 = 0.999 * h;
-    T h1 = 0.001 * h;
+    T h9 = static_cast<T>(0.999) * h;
+    T h1 = static_cast<T>(0.001) * h;
 
     // compute weights
     T a = 0.0;
@@ -78,7 +78,7 @@ bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, s
             T b = xs - a;
             T c = 0.0;
             for (size_t j = nleft; j <= nright; j++) {
-                c += w[j - 1] * std::pow(((T) j) - a, 2);
+                c += w[j - 1] * std::pow(((T) j) - a, static_cast<T>(2));
             }
             if (std::sqrt(c) > 0.001 * range) {
                 b /= c;
