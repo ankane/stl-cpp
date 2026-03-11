@@ -396,12 +396,12 @@ class StlResult {
     std::vector<T> weights;
 
     /// Returns the seasonal strength.
-    inline double seasonal_strength() const {
+    double seasonal_strength() const {
         return detail::strength(seasonal, remainder);
     }
 
     /// Returns the trend strength.
-    inline double trend_strength() const {
+    double trend_strength() const {
         return detail::strength(trend, remainder);
     }
 };
@@ -427,73 +427,73 @@ class StlParams {
 
   public:
     /// Sets the length of the seasonal smoother.
-    inline StlParams seasonal_length(size_t length) {
+    StlParams seasonal_length(size_t length) {
         this->ns_ = length;
         return *this;
     }
 
     /// Sets the length of the trend smoother.
-    inline StlParams trend_length(size_t length) {
+    StlParams trend_length(size_t length) {
         this->nt_ = length;
         return *this;
     }
 
     /// Sets the length of the low-pass filter.
-    inline StlParams low_pass_length(size_t length) {
+    StlParams low_pass_length(size_t length) {
         this->nl_ = length;
         return *this;
     }
 
     /// Sets the degree of locally-fitted polynomial in seasonal smoothing.
-    inline StlParams seasonal_degree(int degree) {
+    StlParams seasonal_degree(int degree) {
         this->isdeg_ = degree;
         return *this;
     }
 
     /// Sets the degree of locally-fitted polynomial in trend smoothing.
-    inline StlParams trend_degree(int degree) {
+    StlParams trend_degree(int degree) {
         this->itdeg_ = degree;
         return *this;
     }
 
     /// Sets the degree of locally-fitted polynomial in low-pass smoothing.
-    inline StlParams low_pass_degree(int degree) {
+    StlParams low_pass_degree(int degree) {
         this->ildeg_ = degree;
         return *this;
     }
 
     /// Sets the skipping value for seasonal smoothing.
-    inline StlParams seasonal_jump(size_t jump) {
+    StlParams seasonal_jump(size_t jump) {
         this->nsjump_ = jump;
         return *this;
     }
 
     /// Sets the skipping value for trend smoothing.
-    inline StlParams trend_jump(size_t jump) {
+    StlParams trend_jump(size_t jump) {
         this->ntjump_ = jump;
         return *this;
     }
 
     /// Sets the skipping value for low-pass smoothing.
-    inline StlParams low_pass_jump(size_t jump) {
+    StlParams low_pass_jump(size_t jump) {
         this->nljump_ = jump;
         return *this;
     }
 
     /// Sets the number of loops for updating the seasonal and trend components.
-    inline StlParams inner_loops(size_t loops) {
+    StlParams inner_loops(size_t loops) {
         this->ni_ = loops;
         return *this;
     }
 
     /// Sets the number of iterations of robust fitting.
-    inline StlParams outer_loops(size_t loops) {
+    StlParams outer_loops(size_t loops) {
         this->no_ = loops;
         return *this;
     }
 
     /// Sets whether robustness iterations are to be used.
-    inline StlParams robust(bool robust) {
+    StlParams robust(bool robust) {
         this->robust_ = robust;
         return *this;
     }
@@ -589,7 +589,7 @@ class MstlResult {
     std::vector<T> remainder;
 
     /// Returns the seasonal strength.
-    inline std::vector<double> seasonal_strength() const {
+    std::vector<double> seasonal_strength() const {
         std::vector<double> res;
         for (const auto& s : seasonal) {
             res.push_back(detail::strength(s, remainder));
@@ -598,7 +598,7 @@ class MstlResult {
     }
 
     /// Returns the trend strength.
-    inline double trend_strength() const {
+    double trend_strength() const {
         return detail::strength(trend, remainder);
     }
 };
@@ -612,25 +612,25 @@ class MstlParams {
 
   public:
     /// Sets the number of iterations.
-    inline MstlParams iterations(size_t iterations) {
+    MstlParams iterations(size_t iterations) {
         this->iterate_ = iterations;
         return *this;
     }
 
     /// Sets lambda for Box-Cox transformation.
-    inline MstlParams lambda(float lambda) {
+    MstlParams lambda(float lambda) {
         this->lambda_ = lambda;
         return *this;
     }
 
     /// Sets the lengths of the seasonal smoothers.
-    inline MstlParams seasonal_lengths(const std::vector<size_t>& lengths) {
+    MstlParams seasonal_lengths(const std::vector<size_t>& lengths) {
         this->swin_ = lengths;
         return *this;
     }
 
     /// Sets the STL parameters.
-    inline MstlParams stl_params(const StlParams& stl_params) {
+    MstlParams stl_params(const StlParams& stl_params) {
         this->stl_params_ = stl_params;
         return *this;
     }
