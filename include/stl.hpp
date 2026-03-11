@@ -670,7 +670,7 @@ std::vector<T> box_cox(std::span<const T> y, float lambda) {
 template<typename T>
 std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
     std::span<const T> x,
-    std::span<const size_t> seas_ids,
+    const std::vector<size_t>& seas_ids,
     size_t iterate,
     std::optional<float> lambda,
     const std::optional<std::vector<size_t>>& swin,
@@ -684,7 +684,7 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
         indices.push_back(i);
     }
     std::sort(indices.begin(), indices.end(), [&seas_ids](size_t a, size_t b) {
-        return seas_ids[a] < seas_ids[b];
+        return seas_ids.at(a) < seas_ids.at(b);
     });
 
     if (seas_ids.size() == 1) {
@@ -715,12 +715,12 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
                 StlResult<T> fit;
                 if (swin) {
                     StlParams clone = stl_params;
-                    fit = clone.seasonal_length(swin.value().at(idx)).fit(deseas, seas_ids[idx]);
+                    fit = clone.seasonal_length(swin.value().at(idx)).fit(deseas, seas_ids.at(idx));
                 } else if (stl_params.ns_.has_value()) {
-                    fit = stl_params.fit(deseas, seas_ids[idx]);
+                    fit = stl_params.fit(deseas, seas_ids.at(idx));
                 } else {
                     StlParams clone = stl_params;
-                    fit = clone.seasonal_length(7 + 4 * (i + 1)).fit(deseas, seas_ids[idx]);
+                    fit = clone.seasonal_length(7 + 4 * (i + 1)).fit(deseas, seas_ids.at(idx));
                 }
 
                 seasonality.at(idx) = fit.seasonal;
@@ -781,7 +781,8 @@ MstlResult<T> MstlParams::fit(std::span<const T> series, std::span<const size_t>
 
     auto [trend, remainder, seasonal] = detail::mstl(
         series,
-        periods,
+        // copy to support bounds checking before C++26
+        std::vector(periods.begin(), periods.end()),
         iterate_,
         lambda_,
         swin_,
