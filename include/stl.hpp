@@ -679,6 +679,7 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
     // keep track of indices instead of sorting seas_ids
     // so order is preserved with seasonality
     std::vector<size_t> indices;
+    indices.reserve(seas_ids.size());
     for (size_t i = 0; i < seas_ids.size(); i++) {
         indices.push_back(i);
     }
