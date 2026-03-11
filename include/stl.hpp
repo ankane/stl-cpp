@@ -697,7 +697,7 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
 
     std::vector<T> deseas = lambda.has_value() ? box_cox(x, lambda.value()) : std::vector<T>(x.begin(), x.end());
 
-    if (seas_ids.size() != 0) {
+    if (!seas_ids.empty()) {
         for (size_t i = 0; i < seas_ids.size(); i++) {
             seasonality.push_back(std::vector<T>());
         }
