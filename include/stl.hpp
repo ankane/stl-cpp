@@ -295,36 +295,36 @@ void stl(std::span<const T> y, size_t np, size_t ns, size_t nt, size_t nl, int i
     size_t n = y.size();
 
     if (ns < 3) {
-        throw std::invalid_argument("seasonal_length must be at least 3");
+        throw std::invalid_argument{"seasonal_length must be at least 3"};
     }
     if (nt < 3) {
-        throw std::invalid_argument("trend_length must be at least 3");
+        throw std::invalid_argument{"trend_length must be at least 3"};
     }
     if (nl < 3) {
-        throw std::invalid_argument("low_pass_length must be at least 3");
+        throw std::invalid_argument{"low_pass_length must be at least 3"};
     }
     if (np < 2) {
-        throw std::invalid_argument("period must be at least 2");
+        throw std::invalid_argument{"period must be at least 2"};
     }
 
     if (isdeg != 0 && isdeg != 1) {
-        throw std::invalid_argument("seasonal_degree must be 0 or 1");
+        throw std::invalid_argument{"seasonal_degree must be 0 or 1"};
     }
     if (itdeg != 0 && itdeg != 1) {
-        throw std::invalid_argument("trend_degree must be 0 or 1");
+        throw std::invalid_argument{"trend_degree must be 0 or 1"};
     }
     if (ildeg != 0 && ildeg != 1) {
-        throw std::invalid_argument("low_pass_degree must be 0 or 1");
+        throw std::invalid_argument{"low_pass_degree must be 0 or 1"};
     }
 
     if (ns % 2 != 1) {
-        throw std::invalid_argument("seasonal_length must be odd");
+        throw std::invalid_argument{"seasonal_length must be odd"};
     }
     if (nt % 2 != 1) {
-        throw std::invalid_argument("trend_length must be odd");
+        throw std::invalid_argument{"trend_length must be odd"};
     }
     if (nl % 2 != 1) {
-        throw std::invalid_argument("low_pass_length must be odd");
+        throw std::invalid_argument{"low_pass_length must be odd"};
     }
 
     std::vector<T> work1(n + 2 * np);
@@ -519,7 +519,7 @@ StlResult<T> StlParams::fit(std::span<const T> series, size_t period) const {
     size_t n = series.size();
 
     if (n < 2 * np) {
-        throw std::invalid_argument("series has less than two periods");
+        throw std::invalid_argument{"series has less than two periods"};
     }
 
     size_t ns = this->ns_.value_or(np);
@@ -733,7 +733,7 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
         }
     } else {
         // TODO use Friedman's Super Smoother for trend
-        throw std::invalid_argument("periods must not be empty");
+        throw std::invalid_argument{"periods must not be empty"};
     }
 
     std::vector<T> remainder;
@@ -753,7 +753,7 @@ MstlResult<T> MstlParams::fit(std::span<const T> series, std::span<const size_t>
     // and ensure seasonal is always same length as periods
     for (auto v : periods) {
         if (v < 2) {
-            throw std::invalid_argument("periods must be at least 2");
+            throw std::invalid_argument{"periods must be at least 2"};
         }
     }
 
@@ -761,21 +761,21 @@ MstlResult<T> MstlParams::fit(std::span<const T> series, std::span<const size_t>
     // and ensure seasonal is always same length as periods
     for (auto v : periods) {
         if (series.size() < v * 2) {
-            throw std::invalid_argument("series has less than two periods");
+            throw std::invalid_argument{"series has less than two periods"};
         }
     }
 
     if (lambda_.has_value()) {
         float lambda = lambda_.value();
         if (lambda < 0 || lambda > 1) {
-            throw std::invalid_argument("lambda must be between 0 and 1");
+            throw std::invalid_argument{"lambda must be between 0 and 1"};
         }
     }
 
     if (swin_.has_value()) {
         const std::vector<size_t>& swin = swin_.value();
         if (swin.size() != periods.size()) {
-            throw std::invalid_argument("seasonal_lengths must have the same length as periods");
+            throw std::invalid_argument{"seasonal_lengths must have the same length as periods"};
         }
     }
 
