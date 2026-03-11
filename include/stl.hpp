@@ -97,7 +97,7 @@ bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, s
 }
 
 template<typename T>
-void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, bool userw, const std::vector<T>& rw, T* ys, std::vector<T>& res) {
+void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, bool userw, const std::vector<T>& rw, std::span<T> ys, std::vector<T>& res) {
     if (n < 2) {
         ys[0] = y.at(0);
         return;
@@ -249,7 +249,7 @@ void ss(const std::vector<T>& y, size_t n, size_t np, size_t ns, int isdeg, size
                 work3.at(i - 1) = rw.at((i - 1) * np + j - 1);
             }
         }
-        ess(work1, k, ns, isdeg, nsjump, userw, work3, work2.data() + 1, work4);
+        ess(work1, k, ns, isdeg, nsjump, userw, work3, std::span{work2}.subspan(1), work4);
         T xs = 0.0;
         size_t nright = std::min(ns, k);
         bool ok = est(work1, k, ns, isdeg, xs, &work2.at(0), 1, nright, work4, userw, work3);
@@ -279,14 +279,14 @@ void onestp(std::span<const T> y, size_t np, size_t ns, size_t nt, size_t nl, in
 
         ss(work1, n, np, ns, isdeg, nsjump, userw, rw, work2, work3, work4, work5, season);
         fts(work2, n + 2 * np, np, work3, work1);
-        ess(work3, n, nl, ildeg, nljump, false, work4, work1.data(), work5);
+        ess(work3, n, nl, ildeg, nljump, false, work4, std::span{work1}, work5);
         for (size_t i = 0; i < n; i++) {
             season.at(i) = work2.at(np + i) - work1.at(i);
         }
         for (size_t i = 0; i < n; i++) {
             work1.at(i) = y[i] - season.at(i);
         }
-        ess(work1, n, nt, itdeg, ntjump, userw, rw, trend.data(), work3);
+        ess(work1, n, nt, itdeg, ntjump, userw, rw, std::span{trend}, work3);
     }
 }
 
