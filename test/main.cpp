@@ -2,22 +2,16 @@
 #include <cmath>
 #include <cstddef>
 #include <cstring>
+#include <functional>
 #include <iostream>
+#include <optional>
 #include <ranges>
 #include <span>
 #include <stdexcept>
+#include <string_view>
 #include <vector>
 
 #include "../include/stl.hpp"
-
-#define ASSERT_EXCEPTION(code, type, message) { \
-    try {                                       \
-        code;                                   \
-        assert(false);                          \
-    } catch (const type &e) {                   \
-        assert(strcmp(e.what(), message) == 0); \
-    }                                           \
-}
 
 template<typename T>
 void print_vector(const std::vector<T>& x) {
@@ -42,6 +36,20 @@ void assert_elements_in_delta(const std::vector<double>& exp, const std::vector<
     assert(exp.size() == act.size());
     for (size_t i = 0; i < exp.size(); i++) {
         assert_in_delta(exp.at(i), act.at(i));
+    }
+}
+
+template<typename T>
+void assert_exception(const std::function<void(void)>& code, std::optional<std::string_view> message = std::nullopt) {
+    std::optional<T> exception;
+    try {
+        code();
+    } catch (const T& e) {
+        exception = e;
+    }
+    assert(exception.has_value());
+    if (message) {
+        assert(std::string_view{exception.value().what()} == message.value());
     }
 }
 
@@ -137,20 +145,16 @@ void test_stl_robust() {
 
 template<typename T>
 void test_stl_too_few_periods() {
-    ASSERT_EXCEPTION(
-        stl::params().fit(generate_series<T>(), 16),
-        std::invalid_argument,
-        "series has less than two periods"
-    );
+    assert_exception<std::invalid_argument>([]() {
+        stl::params().fit(generate_series<T>(), 16);
+    }, "series has less than two periods");
 }
 
 template<typename T>
 void test_stl_bad_seasonal_degree() {
-    ASSERT_EXCEPTION(
-        stl::params().seasonal_degree(2).fit(generate_series<T>(), 7),
-        std::invalid_argument,
-        "seasonal_degree must be 0 or 1"
-    );
+    assert_exception<std::invalid_argument>([]() {
+        stl::params().seasonal_degree(2).fit(generate_series<T>(), 7);
+    }, "seasonal_degree must be 0 or 1");
 }
 
 template<typename T>
@@ -291,38 +295,30 @@ void test_mstl_lambda_zero() {
 
 template<typename T>
 void test_mstl_lambda_out_of_range() {
-    ASSERT_EXCEPTION(
-        stl::mstl_params().lambda(2.0).fit(generate_series<T>(), {6, 10}),
-        std::invalid_argument,
-        "lambda must be between 0 and 1"
-    );
+    assert_exception<std::invalid_argument>([]() {
+        stl::mstl_params().lambda(2.0).fit(generate_series<T>(), {6, 10});
+    }, "lambda must be between 0 and 1");
 }
 
 template<typename T>
 void test_mstl_empty_periods() {
-    ASSERT_EXCEPTION(
-        stl::mstl_params().fit(generate_series<T>(), {}),
-        std::invalid_argument,
-        "periods must not be empty"
-    );
+    assert_exception<std::invalid_argument>([]() {
+        stl::mstl_params().fit(generate_series<T>(), {});
+    }, "periods must not be empty");
 }
 
 template<typename T>
 void test_mstl_period_one() {
-    ASSERT_EXCEPTION(
-        stl::mstl_params().fit(generate_series<T>(), {1}),
-        std::invalid_argument,
-        "periods must be at least 2"
-    );
+    assert_exception<std::invalid_argument>([]() {
+        stl::mstl_params().fit(generate_series<T>(), {1});
+    }, "periods must be at least 2");
 }
 
 template<typename T>
 void test_mstl_too_few_periods() {
-    ASSERT_EXCEPTION(
-        stl::mstl_params().fit(generate_series<T>(), {16}),
-        std::invalid_argument,
-        "series has less than two periods"
-    );
+    assert_exception<std::invalid_argument>([]() {
+        stl::mstl_params().fit(generate_series<T>(), {16});
+    }, "series has less than two periods");
 }
 
 template<typename T>
