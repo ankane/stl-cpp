@@ -1,0 +1,128 @@
+#include <cassert>
+#include <cmath>
+#include <cstring>
+#include <span>
+#include <stdexcept>
+#include <vector>
+
+#include <stl.hpp>
+
+#include "helper.hpp"
+
+template<typename T>
+void test_stl_works() {
+    auto series = generate_series<T>();
+    auto result = stl::params().fit(series, 7);
+    assert_elements_in_delta(
+        {0.36926576, 0.75655484, -1.3324139, 1.9553658, -0.6044802},
+        first(result.seasonal, 5)
+    );
+    assert_elements_in_delta(
+        {4.804099, 4.9097075, 5.015316, 5.16045, 5.305584},
+        first(result.trend, 5)
+    );
+    assert_elements_in_delta(
+        {-0.17336464, 3.3337379, -1.6829021, 1.8841844, -4.7011037},
+        first(result.remainder, 5)
+    );
+    assert_elements_in_delta({1.0, 1.0, 1.0, 1.0, 1.0}, first(result.weights, 5));
+}
+
+template<typename T>
+void test_stl_span() {
+    auto series = generate_series<T>();
+    auto result = stl::params().fit(std::span<const T>(series), 7);
+    assert_elements_in_delta(
+        {0.36926576, 0.75655484, -1.3324139, 1.9553658, -0.6044802},
+        first(result.seasonal, 5)
+    );
+    assert_elements_in_delta(
+        {4.804099, 4.9097075, 5.015316, 5.16045, 5.305584},
+        first(result.trend, 5)
+    );
+    assert_elements_in_delta(
+        {-0.17336464, 3.3337379, -1.6829021, 1.8841844, -4.7011037},
+        first(result.remainder, 5)
+    );
+    assert_elements_in_delta({1.0, 1.0, 1.0, 1.0, 1.0}, first(result.weights, 5));
+}
+
+template<typename T>
+void test_stl_robust() {
+    auto series = generate_series<T>();
+    auto result = stl::params().robust(true).fit(series, 7);
+    assert_elements_in_delta(
+        {0.14922355, 0.47939026, -1.833231, 1.7411387, 0.8200711},
+        first(result.seasonal, 5)
+    );
+    assert_elements_in_delta(
+        {5.397365, 5.4745436, 5.5517216, 5.6499176, 5.748114},
+        first(result.trend, 5)
+    );
+    assert_elements_in_delta(
+        {-0.5465884, 3.0460663, -1.7184906, 1.6089439, -6.5681853},
+        first(result.remainder, 5)
+    );
+    assert_elements_in_delta(
+        {0.99374926, 0.8129377, 0.9385952, 0.9458036, 0.29742217},
+        first(result.weights, 5)
+    );
+}
+
+template<typename T>
+void test_stl_too_few_periods() {
+    assert_exception<std::invalid_argument>([]() {
+        stl::params().fit(generate_series<T>(), 16);
+    }, "series has less than two periods");
+}
+
+template<typename T>
+void test_stl_bad_seasonal_degree() {
+    assert_exception<std::invalid_argument>([]() {
+        stl::params().seasonal_degree(2).fit(generate_series<T>(), 7);
+    }, "seasonal_degree must be 0 or 1");
+}
+
+template<typename T>
+void test_stl_seasonal_strength() {
+    auto result = stl::params().fit(generate_series<T>(), 7);
+    assert_in_delta(0.284111676315015, result.seasonal_strength());
+}
+
+template<typename T>
+void test_stl_seasonal_strength_max() {
+    auto series = max_seasonal_series<T>();
+    auto result = stl::params().fit(series, 7);
+    assert_in_delta(1.0, result.seasonal_strength());
+}
+
+template<typename T>
+void test_stl_trend_strength() {
+    auto result = stl::params().fit(generate_series<T>(), 7);
+    assert_in_delta(0.16384245231864702, result.trend_strength());
+}
+
+template<typename T>
+void test_stl_trend_strength_max() {
+    auto series = max_trend_series<T>();
+    auto result = stl::params().fit(series, 7);
+    assert_in_delta(1.0, result.trend_strength());
+}
+
+template<typename T>
+void test_type() {
+    test_stl_works<T>();
+    test_stl_span<T>();
+    test_stl_robust<T>();
+    test_stl_too_few_periods<T>();
+    test_stl_bad_seasonal_degree<T>();
+    test_stl_seasonal_strength<T>();
+    test_stl_seasonal_strength_max<T>();
+    test_stl_trend_strength<T>();
+    test_stl_trend_strength_max<T>();
+}
+
+void test_stl() {
+    test_type<float>();
+    test_type<double>();
+}
