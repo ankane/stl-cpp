@@ -115,7 +115,7 @@ double strength = res.seasonal_strength();
 Get the seasonal strength for MSTL
 
 ```cpp
-const std::vector<double>& strength = res.seasonal_strength();
+std::vector<double> strength = res.seasonal_strength();
 ```
 
 Get the trend strength
