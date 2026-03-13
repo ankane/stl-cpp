@@ -30,6 +30,8 @@ Include the header
 Decompose a time series
 
 ```cpp
+using stl::StlResult;
+
 std::vector<float> series{
     5.0, 9.0, 2.0, 9.0, 0.0, 6.0, 3.0, 8.0, 5.0, 8.0,
     7.0, 8.0, 8.0, 0.0, 2.0, 5.0, 0.0, 5.0, 6.0, 7.0,
@@ -37,15 +39,15 @@ std::vector<float> series{
 };
 size_t period = 7; // period of seasonal component
 
-auto res = stl::params().fit(series, period);
+StlResult res = stl::params().fit(series, period);
 ```
 
 Get the components
 
 ```cpp
-res.seasonal;
-res.trend;
-res.remainder;
+const vector<float>& seasonal = res.seasonal;
+const vector<float>& trend = res.trend;
+const vector<float>& remainder = res.remainder;
 ```
 
 ## Robustness
@@ -53,13 +55,13 @@ res.remainder;
 Use robustness iterations
 
 ```cpp
-auto res = stl::params().robust(true).fit(series, period);
+StlResult res = stl::params().robust(true).fit(series, period);
 ```
 
 Get robustness weights
 
 ```cpp
-res.weights;
+const vector<float>& weights = res.weights;
 ```
 
 ## Multiple Seasonality
@@ -67,7 +69,9 @@ res.weights;
 Specify multiple periods
 
 ```cpp
-auto res = stl::mstl_params().fit(series, {{7, 365}});
+using stl::MstlResult;
+
+MstlResult res = stl::mstl_params().fit(series, {{7, 365}});
 ```
 
 ## Parameters
@@ -102,16 +106,22 @@ stl::mstl_params()
 
 ## Strength
 
-Get the seasonal strength
+Get the seasonal strength for STL
 
 ```cpp
-res.seasonal_strength();
+double strength = res.seasonal_strength();
+```
+
+Get the seasonal strength for MSTL
+
+```cpp
+const std::vector<double>& strength = res.seasonal_strength();
 ```
 
 Get the trend strength
 
 ```cpp
-res.trend_strength();
+double strength = res.trend_strength();
 ```
 
 ## Credits
