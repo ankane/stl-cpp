@@ -45,9 +45,9 @@ StlResult res = stl::params().fit(series, period);
 Get the components
 
 ```cpp
-const vector<float>& seasonal = res.seasonal;
-const vector<float>& trend = res.trend;
-const vector<float>& remainder = res.remainder;
+const std::vector<float>& seasonal = res.seasonal;
+const std::vector<float>& trend = res.trend;
+const std::vector<float>& remainder = res.remainder;
 ```
 
 ## Robustness
@@ -61,7 +61,7 @@ StlResult res = stl::params().robust(true).fit(series, period);
 Get robustness weights
 
 ```cpp
-const vector<float>& weights = res.weights;
+const std::vector<float> weights = res.weights;
 ```
 
 ## Multiple Seasonality
