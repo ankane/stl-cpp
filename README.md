@@ -61,7 +61,7 @@ StlResult res = stl::params().robust(true).fit(series, period);
 Get robustness weights
 
 ```cpp
-const std::vector<float> weights = res.weights;
+const std::vector<float>& weights = res.weights;
 ```
 
 ## Multiple Seasonality
