@@ -39,7 +39,7 @@ std::vector<float> series{
 };
 size_t period = 7; // period of seasonal component
 
-StlResult res = stl::params().fit(series, period);
+StlResult<float> res = stl::params().fit(series, period);
 ```
 
 Get the components
@@ -55,7 +55,7 @@ const std::vector<float>& remainder = res.remainder;
 Use robustness iterations
 
 ```cpp
-StlResult res = stl::params().robust(true).fit(series, period);
+StlResult<float> res = stl::params().robust(true).fit(series, period);
 ```
 
 Get robustness weights
@@ -71,7 +71,7 @@ Specify multiple periods
 ```cpp
 using stl::MstlResult;
 
-MstlResult res = stl::mstl_params().fit(series, {{7, 365}});
+MstlResult<float> res = stl::mstl_params().fit(series, {{7, 365}});
 ```
 
 ## Parameters
