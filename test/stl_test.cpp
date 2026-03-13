@@ -9,10 +9,12 @@
 
 #include "helper.hpp"
 
+using stl::StlResult;
+
 template<typename T>
 void test_stl_works() {
-    auto series = generate_series<T>();
-    auto result = stl::params().fit(series, 7);
+    std::vector<T> series = generate_series<T>();
+    StlResult<T> result = stl::params().fit(series, 7);
     assert_elements_in_delta(
         {0.36926576, 0.75655484, -1.3324139, 1.9553658, -0.6044802},
         first(result.seasonal, 5)
@@ -30,8 +32,8 @@ void test_stl_works() {
 
 template<typename T>
 void test_stl_span() {
-    auto series = generate_series<T>();
-    auto result = stl::params().fit(std::span<const T>(series), 7);
+    std::vector<T> series = generate_series<T>();
+    StlResult<T> result = stl::params().fit(std::span<const T>(series), 7);
     assert_elements_in_delta(
         {0.36926576, 0.75655484, -1.3324139, 1.9553658, -0.6044802},
         first(result.seasonal, 5)
@@ -49,8 +51,8 @@ void test_stl_span() {
 
 template<typename T>
 void test_stl_robust() {
-    auto series = generate_series<T>();
-    auto result = stl::params().robust(true).fit(series, 7);
+    std::vector<T> series = generate_series<T>();
+    StlResult<T> result = stl::params().robust(true).fit(series, 7);
     assert_elements_in_delta(
         {0.14922355, 0.47939026, -1.833231, 1.7411387, 0.8200711},
         first(result.seasonal, 5)
@@ -85,27 +87,27 @@ void test_stl_bad_seasonal_degree() {
 
 template<typename T>
 void test_stl_seasonal_strength() {
-    auto result = stl::params().fit(generate_series<T>(), 7);
+    StlResult<T> result = stl::params().fit(generate_series<T>(), 7);
     assert_in_delta(0.284111676315015, result.seasonal_strength());
 }
 
 template<typename T>
 void test_stl_seasonal_strength_max() {
-    auto series = max_seasonal_series<T>();
-    auto result = stl::params().fit(series, 7);
+    std::vector<T> series = max_seasonal_series<T>();
+    StlResult<T> result = stl::params().fit(series, 7);
     assert_in_delta(1.0, result.seasonal_strength());
 }
 
 template<typename T>
 void test_stl_trend_strength() {
-    auto result = stl::params().fit(generate_series<T>(), 7);
+    StlResult<T> result = stl::params().fit(generate_series<T>(), 7);
     assert_in_delta(0.16384245231864702, result.trend_strength());
 }
 
 template<typename T>
 void test_stl_trend_strength_max() {
-    auto series = max_trend_series<T>();
-    auto result = stl::params().fit(series, 7);
+    std::vector<T> series = max_trend_series<T>();
+    StlResult<T> result = stl::params().fit(series, 7);
     assert_in_delta(1.0, result.trend_strength());
 }
 

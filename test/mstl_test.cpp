@@ -9,9 +9,11 @@
 
 #include "helper.hpp"
 
+using stl::MstlResult;
+
 template<typename T>
 void test_mstl_works() {
-    auto result = stl::mstl_params().fit(generate_series<T>(), {6, 10});
+    MstlResult<T> result = stl::mstl_params().fit(generate_series<T>(), {6, 10});
     assert_elements_in_delta(
         {0.28318232, 0.70529824, -1.980384, 2.1643379, -2.3356874},
         first(result.seasonal.at(0), 5)
@@ -32,8 +34,8 @@ void test_mstl_works() {
 
 template<typename T>
 void test_mstl_span() {
-    auto series = generate_series<T>();
-    auto result = stl::mstl_params().fit(std::span<const T>(series), {{6, 10}});
+    std::vector<T> series = generate_series<T>();
+    MstlResult<T> result = stl::mstl_params().fit(std::span<const T>(series), {{6, 10}});
     assert_elements_in_delta(
         {0.28318232, 0.70529824, -1.980384, 2.1643379, -2.3356874},
         first(result.seasonal.at(0), 5)
@@ -54,7 +56,7 @@ void test_mstl_span() {
 
 template<typename T>
 void test_mstl_unsorted_periods() {
-    auto result = stl::mstl_params().fit(generate_series<T>(), {10, 6});
+    MstlResult<T> result = stl::mstl_params().fit(generate_series<T>(), {10, 6});
     assert_elements_in_delta(
         {1.4130436, 1.6048906, 0.050958008, -1.8706754, -1.7704514},
         first(result.seasonal.at(0), 5)
@@ -75,7 +77,7 @@ void test_mstl_unsorted_periods() {
 
 template<typename T>
 void test_mstl_lambda() {
-    auto result = stl::mstl_params().lambda(0.5).fit(generate_series<T>(), {6, 10});
+    MstlResult<T> result = stl::mstl_params().lambda(0.5).fit(generate_series<T>(), {6, 10});
     assert_elements_in_delta(
         {0.43371448, 0.10503793, -0.7178911, 1.2356076, -1.8253292},
         first(result.seasonal.at(0), 5)
@@ -100,7 +102,7 @@ void test_mstl_lambda_zero() {
     for (auto& v : generate_series<T>()) {
         series.push_back(v + 1);
     }
-    auto result = stl::mstl_params().lambda(0.0).fit(series, {6, 10});
+    MstlResult<T> result = stl::mstl_params().lambda(0.0).fit(series, {6, 10});
     assert_elements_in_delta(
         {0.18727916, 0.029921893, -0.2716494, 0.47748315, -0.7320051},
         first(result.seasonal.at(0), 5)
@@ -149,7 +151,7 @@ void test_mstl_too_few_periods() {
 
 template<typename T>
 void test_mstl_seasonal_strength() {
-    auto result = stl::mstl_params()
+    MstlResult<T> result = stl::mstl_params()
         .stl_params(stl::params().seasonal_length(7))
         .fit(generate_series<T>(), {7});
     assert_in_delta(0.284111676315015, result.seasonal_strength().at(0));
@@ -157,8 +159,8 @@ void test_mstl_seasonal_strength() {
 
 template<typename T>
 void test_mstl_seasonal_strength_max() {
-    auto series = max_seasonal_series<T>();
-    auto result = stl::mstl_params()
+    std::vector<T> series = max_seasonal_series<T>();
+    MstlResult<T> result = stl::mstl_params()
         .stl_params(stl::params().seasonal_length(7))
         .fit(series, {7});
     assert_in_delta(1.0, result.seasonal_strength().at(0));
@@ -166,7 +168,7 @@ void test_mstl_seasonal_strength_max() {
 
 template<typename T>
 void test_mstl_trend_strength() {
-    auto result = stl::mstl_params()
+    MstlResult<T> result = stl::mstl_params()
         .stl_params(stl::params().seasonal_length(7))
         .fit(generate_series<T>(), {7});
     assert_in_delta(0.16384245231864702, result.trend_strength());
@@ -174,8 +176,8 @@ void test_mstl_trend_strength() {
 
 template<typename T>
 void test_mstl_trend_strength_max() {
-    auto series = max_trend_series<T>();
-    auto result = stl::mstl_params()
+    std::vector<T> series = max_trend_series<T>();
+    MstlResult<T> result = stl::mstl_params()
         .stl_params(stl::params().seasonal_length(7))
         .fit(series, {7});
     assert_in_delta(1.0, result.trend_strength());
