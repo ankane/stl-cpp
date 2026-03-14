@@ -601,6 +601,12 @@ class MstlResult {
     double trend_strength() const {
         return detail::strength(trend, remainder);
     }
+
+  private:
+    MstlResult(std::vector<std::vector<T>>&& seasonal, std::vector<T>&& trend, std::vector<T>&& remainder) : seasonal{std::move(seasonal)}, trend{std::move(trend)}, remainder{std::move(remainder)} { }
+
+    friend class MstlParams;
+
 };
 
 /// A set of MSTL parameters.
@@ -790,9 +796,9 @@ MstlResult<T> MstlParams::fit(std::span<const T> series, std::span<const size_t>
     );
 
     return MstlResult<T> {
-        seasonal,
-        trend,
-        remainder
+        std::move(seasonal),
+        std::move(trend),
+        std::move(remainder)
     };
 }
 
