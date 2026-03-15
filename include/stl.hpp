@@ -759,12 +759,12 @@ std::vector<T> box_cox(std::span<const T> y, float lambda) {
     std::vector<T> res;
     res.reserve(y.size());
     if (lambda != 0.0) {
-        for (size_t i = 0; i < y.size(); i++) {
-            res.push_back(static_cast<T>(std::pow(y[i], lambda) - 1.0) / lambda);
+        for (auto yi : y) {
+            res.push_back(static_cast<T>(std::pow(yi, lambda) - 1.0) / lambda);
         }
     } else {
-        for (size_t i = 0; i < y.size(); i++) {
-            res.push_back(std::log(y[i]));
+        for (auto yi : y) {
+            res.push_back(std::log(yi));
         }
     }
     return res;
