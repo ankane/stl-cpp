@@ -473,6 +473,9 @@ double strength(const std::vector<T>& component, const std::vector<T>& remainder
 template<typename T = float>
 class StlResult {
   public:
+    /// @private
+    StlResult() = default;
+
     /// Returns the seasonal component.
     std::vector<T> seasonal;
 
@@ -494,6 +497,21 @@ class StlResult {
     double trend_strength() const {
         return detail::strength(trend, remainder);
     }
+
+  private:
+    StlResult(
+        std::vector<T>&& seasonal,
+        std::vector<T>&& trend,
+        std::vector<T>&& remainder,
+        std::vector<T>&& weights
+    ) :
+        seasonal{std::move(seasonal)},
+        trend{std::move(trend)},
+        remainder{std::move(remainder)},
+        weights{std::move(weights)} {
+    }
+
+    friend class StlParams;
 };
 
 /// A set of STL parameters.
@@ -617,12 +635,10 @@ StlResult<T> StlParams::fit(std::span<const T> series, size_t period) const {
     int isdeg = this->isdeg_;
     int itdeg = this->itdeg_;
 
-    StlResult<T> res{
-        std::vector<T>(n),
-        std::vector<T>(n),
-        std::vector<T>(),
-        std::vector<T>(n)
-    };
+    std::vector<T> seasonal(n);
+    std::vector<T> trend(n);
+    std::vector<T> remainder;
+    std::vector<T> weights(n);
 
     int ildeg = this->ildeg_.value_or(itdeg);
     size_t newns = std::max(ns, static_cast<size_t>(3));
@@ -650,14 +666,19 @@ StlResult<T> StlParams::fit(std::span<const T> series, size_t period) const {
     size_t ntjump = this->ntjump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nt) / 10.0)));
     size_t nljump = this->nljump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nl) / 10.0)));
 
-    detail::stl(y, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, res.weights, res.seasonal, res.trend);
+    detail::stl(y, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, weights, seasonal, trend);
 
-    res.remainder.reserve(n);
+    remainder.reserve(n);
     for (size_t i = 0; i < n; i++) {
-        res.remainder.push_back(y[i] - res.seasonal.at(i) - res.trend.at(i));
+        remainder.push_back(y[i] - seasonal.at(i) - trend.at(i));
     }
 
-    return res;
+    return StlResult<T> {
+        std::move(seasonal),
+        std::move(trend),
+        std::move(remainder),
+        std::move(weights)
+    };
 }
 
 template<typename T>
@@ -669,6 +690,9 @@ StlResult<T> StlParams::fit(const std::vector<T>& series, size_t period) const {
 template<typename T = float>
 class MstlResult {
   public:
+    /// @private
+    MstlResult() = default;
+
     /// Returns the seasonal component.
     std::vector<std::vector<T>> seasonal;
 
