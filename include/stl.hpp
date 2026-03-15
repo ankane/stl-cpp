@@ -74,14 +74,18 @@ bool est(
 
     if (a <= 0.0) {
         return false;
-    } else { // weighted least squares
-        for (size_t j = nleft; j <= nright; j++) { // make sum of w(j) == 1
+    } else {
+        // weighted least squares
+        for (size_t j = nleft; j <= nright; j++) {
+            // make sum of w(j) == 1
             w.at(j - 1) /= a;
         }
 
-        if (h > 0.0 && ideg > 0) { // use linear fit
+        if (h > 0.0 && ideg > 0) {
+            // use linear fit
             T a = 0.0;
-            for (size_t j = nleft; j <= nright; j++) { // weighted center of x values
+            for (size_t j = nleft; j <= nright; j++) {
+                // weighted center of x values
                 a += w.at(j - 1) * static_cast<T>(j);
             }
             T b = xs - a;
@@ -138,11 +142,13 @@ void ess(
                 ys[i - 1] = y.at(i - 1);
             }
         }
-    } else if (newnj == 1) { // newnj equal to one, len less than n
+    } else if (newnj == 1) {
+        // newnj equal to one, len less than n
         size_t nsh = (len + 1) / 2;
         nleft = 1;
         nright = len;
-        for (size_t i = 1; i <= n; i++) { // fitted value at i
+        for (size_t i = 1; i <= n; i++) {
+            // fitted value at i
             if (i > nsh && nright != n) {
                 nleft += 1;
                 nright += 1;
@@ -152,9 +158,11 @@ void ess(
                 ys[i - 1] = y.at(i - 1);
             }
         }
-    } else { // newnj greater than one, len less than n
+    } else {
+        // newnj greater than one, len less than n
         size_t nsh = (len + 1) / 2;
-        for (size_t i = 1; i <= n; i += newnj) { // fitted value at i
+        for (size_t i = 1; i <= n; i += newnj) {
+            // fitted value at i
             if (i < nsh) {
                 nleft = 1;
                 nright = len;
