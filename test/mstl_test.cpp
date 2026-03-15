@@ -176,7 +176,7 @@ void test_mstl_trend_strength_max() {
 }
 
 template<typename T>
-void test_type() {
+void test_mstl_type() {
     test_mstl_works<T>();
     test_mstl_span<T>();
     test_mstl_unsorted_periods<T>();
@@ -193,6 +193,6 @@ void test_type() {
 }
 
 void test_mstl() {
-    test_type<float>();
-    test_type<double>();
+    test_mstl_type<float>();
+    test_mstl_type<double>();
 }

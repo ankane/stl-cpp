@@ -112,7 +112,7 @@ void test_stl_trend_strength_max() {
 }
 
 template<typename T>
-void test_type() {
+void test_stl_type() {
     test_stl_works<T>();
     test_stl_span<T>();
     test_stl_robust<T>();
@@ -125,6 +125,6 @@ void test_type() {
 }
 
 void test_stl() {
-    test_type<float>();
-    test_type<double>();
+    test_stl_type<float>();
+    test_stl_type<double>();
 }
