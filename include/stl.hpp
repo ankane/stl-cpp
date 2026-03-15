@@ -684,7 +684,15 @@ class MstlResult {
     }
 
   private:
-    MstlResult(std::vector<std::vector<T>>&& seasonal, std::vector<T>&& trend, std::vector<T>&& remainder) : seasonal{std::move(seasonal)}, trend{std::move(trend)}, remainder{std::move(remainder)} { }
+    MstlResult(
+        std::vector<std::vector<T>>&& seasonal,
+        std::vector<T>&& trend,
+        std::vector<T>&& remainder
+    ) :
+        seasonal{std::move(seasonal)},
+        trend{std::move(trend)},
+        remainder{std::move(remainder)} {
+    }
 
     friend class MstlParams;
 };
