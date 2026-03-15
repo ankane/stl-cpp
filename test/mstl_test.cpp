@@ -77,7 +77,7 @@ void test_mstl_unsorted_periods() {
 
 template<typename T>
 void test_mstl_lambda() {
-    Mstl<T> fit{generate_series<T>(), {6, 10}, { .lambda = 0.5 }};
+    Mstl<T> fit{generate_series<T>(), {6, 10}, {.lambda = 0.5}};
     assert_elements_in_delta(
         {0.43371448, 0.10503793, -0.7178911, 1.2356076, -1.8253292},
         first(fit.seasonal().at(0), 5)
@@ -102,7 +102,7 @@ void test_mstl_lambda_zero() {
     for (auto& v : generate_series<T>()) {
         series.push_back(v + 1);
     }
-    Mstl<T> fit{series, {6, 10}, { .lambda = 0.0 }};
+    Mstl<T> fit{series, {6, 10}, {.lambda = 0.0}};
     assert_elements_in_delta(
         {0.18727916, 0.029921893, -0.2716494, 0.47748315, -0.7320051},
         first(fit.seasonal().at(0), 5)
@@ -124,7 +124,7 @@ void test_mstl_lambda_zero() {
 template<typename T>
 void test_mstl_lambda_out_of_range() {
     assert_exception<std::invalid_argument>([]() {
-        Mstl<T>{generate_series<T>(), {6, 10}, { .lambda = 2.0 }};
+        Mstl<T>{generate_series<T>(), {6, 10}, {.lambda = 2.0}};
     }, "lambda must be between 0 and 1");
 }
 
@@ -151,27 +151,27 @@ void test_mstl_too_few_periods() {
 
 template<typename T>
 void test_mstl_seasonal_strength() {
-    Mstl<T> fit{generate_series<T>(), {7}, { .stl_params = { .seasonal_length = 7 } }};
+    Mstl<T> fit{generate_series<T>(), {7}, {.stl_params = {.seasonal_length = 7}}};
     assert_in_delta(0.284111676315015, fit.seasonal_strength().at(0));
 }
 
 template<typename T>
 void test_mstl_seasonal_strength_max() {
     std::vector<T> series = max_seasonal_series<T>();
-    Mstl<T> fit{series, {7}, { .stl_params = { .seasonal_length = 7 } }};
+    Mstl<T> fit{series, {7}, {.stl_params = {.seasonal_length = 7}}};
     assert_in_delta(1.0, fit.seasonal_strength().at(0));
 }
 
 template<typename T>
 void test_mstl_trend_strength() {
-    Mstl<T> fit{generate_series<T>(), {7}, { .stl_params = { .seasonal_length = 7 } }};
+    Mstl<T> fit{generate_series<T>(), {7}, {.stl_params = {.seasonal_length = 7}}};
     assert_in_delta(0.16384245231864702, fit.trend_strength());
 }
 
 template<typename T>
 void test_mstl_trend_strength_max() {
     std::vector<T> series = max_trend_series<T>();
-    Mstl<T> fit{series, {7}, { .stl_params = { .seasonal_length = 7 } }};
+    Mstl<T> fit{series, {7}, {.stl_params = {.seasonal_length = 7}}};
     assert_in_delta(1.0, fit.trend_strength());
 }
 

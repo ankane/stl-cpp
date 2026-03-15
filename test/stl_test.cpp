@@ -52,7 +52,7 @@ void test_stl_span() {
 template<typename T>
 void test_stl_robust() {
     std::vector<T> series = generate_series<T>();
-    Stl<T> fit{series, 7, { .robust = true }};
+    Stl<T> fit{series, 7, {.robust = true}};
     assert_elements_in_delta(
         {0.14922355, 0.47939026, -1.833231, 1.7411387, 0.8200711},
         first(fit.seasonal(), 5)
@@ -81,7 +81,7 @@ void test_stl_too_few_periods() {
 template<typename T>
 void test_stl_bad_seasonal_degree() {
     assert_exception<std::invalid_argument>([]() {
-        Stl<T>{generate_series<T>(), 7, { .seasonal_degree = 2 }};
+        Stl<T>{generate_series<T>(), 7, {.seasonal_degree = 2}};
     }, "seasonal_degree must be 0 or 1");
 }
 
