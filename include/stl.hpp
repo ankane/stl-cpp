@@ -31,7 +31,19 @@ namespace stl {
 namespace detail {
 
 template<typename T>
-bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, size_t nleft, size_t nright, std::vector<T>& w, bool userw, const std::vector<T>& rw) {
+bool est(
+    const std::vector<T>& y,
+    size_t n,
+    size_t len,
+    int ideg,
+    T xs,
+    T* ys,
+    size_t nleft,
+    size_t nright,
+    std::vector<T>& w,
+    bool userw,
+    const std::vector<T>& rw
+) {
     T range = static_cast<T>(n) - static_cast<T>(1.0);
     T h = std::max(xs - static_cast<T>(nleft), static_cast<T>(nright) - xs);
 
@@ -97,7 +109,17 @@ bool est(const std::vector<T>& y, size_t n, size_t len, int ideg, T xs, T* ys, s
 }
 
 template<typename T>
-void ess(const std::vector<T>& y, size_t n, size_t len, int ideg, size_t njump, bool userw, const std::vector<T>& rw, std::span<T> ys, std::vector<T>& res) {
+void ess(
+    const std::vector<T>& y,
+    size_t n,
+    size_t len,
+    int ideg,
+    size_t njump,
+    bool userw,
+    const std::vector<T>& rw,
+    std::span<T> ys,
+    std::vector<T>& res
+) {
     if (n < 2) {
         ys[0] = y.at(0);
         return;
@@ -237,7 +259,21 @@ void rwts(std::span<const T> y, const std::vector<T>& fit, std::vector<T>& rw) {
 }
 
 template<typename T>
-void ss(const std::vector<T>& y, size_t n, size_t np, size_t ns, int isdeg, size_t nsjump, bool userw, std::vector<T>& rw, std::vector<T>& season, std::vector<T>& work1, std::vector<T>& work2, std::vector<T>& work3, std::vector<T>& work4) {
+void ss(
+    const std::vector<T>& y,
+    size_t n,
+    size_t np,
+    size_t ns,
+    int isdeg,
+    size_t nsjump,
+    bool userw,
+    std::vector<T>& rw,
+    std::vector<T>& season,
+    std::vector<T>& work1,
+    std::vector<T>& work2,
+    std::vector<T>& work3,
+    std::vector<T>& work4
+) {
     for (size_t j = 1; j <= np; j++) {
         size_t k = (n - j) / np + 1;
 
@@ -269,7 +305,29 @@ void ss(const std::vector<T>& y, size_t n, size_t np, size_t ns, int isdeg, size
 }
 
 template<typename T>
-void onestp(std::span<const T> y, size_t np, size_t ns, size_t nt, size_t nl, int isdeg, int itdeg, int ildeg, size_t nsjump, size_t ntjump, size_t nljump, size_t ni, bool userw, std::vector<T>& rw, std::vector<T>& season, std::vector<T>& trend, std::vector<T>& work1, std::vector<T>& work2, std::vector<T>& work3, std::vector<T>& work4, std::vector<T>& work5) {
+void onestp(
+    std::span<const T> y,
+    size_t np,
+    size_t ns,
+    size_t nt,
+    size_t nl,
+    int isdeg,
+    int itdeg,
+    int ildeg,
+    size_t nsjump,
+    size_t ntjump,
+    size_t nljump,
+    size_t ni,
+    bool userw,
+    std::vector<T>& rw,
+    std::vector<T>& season,
+    std::vector<T>& trend,
+    std::vector<T>& work1,
+    std::vector<T>& work2,
+    std::vector<T>& work3,
+    std::vector<T>& work4,
+    std::vector<T>& work5
+) {
     size_t n = y.size();
 
     for (size_t j = 0; j < ni; j++) {
@@ -291,7 +349,24 @@ void onestp(std::span<const T> y, size_t np, size_t ns, size_t nt, size_t nl, in
 }
 
 template<typename T>
-void stl(std::span<const T> y, size_t np, size_t ns, size_t nt, size_t nl, int isdeg, int itdeg, int ildeg, size_t nsjump, size_t ntjump, size_t nljump, size_t ni, size_t no, std::vector<T>& rw, std::vector<T>& season, std::vector<T>& trend) {
+void stl(
+    std::span<const T> y,
+    size_t np,
+    size_t ns,
+    size_t nt,
+    size_t nl,
+    int isdeg,
+    int itdeg,
+    int ildeg,
+    size_t nsjump,
+    size_t ntjump,
+    size_t nljump,
+    size_t ni,
+    size_t no,
+    std::vector<T>& rw,
+    std::vector<T>& season,
+    std::vector<T>& trend
+) {
     size_t n = y.size();
 
     if (ns < 3) {
@@ -606,7 +681,6 @@ class MstlResult {
     MstlResult(std::vector<std::vector<T>>&& seasonal, std::vector<T>&& trend, std::vector<T>&& remainder) : seasonal{std::move(seasonal)}, trend{std::move(trend)}, remainder{std::move(remainder)} { }
 
     friend class MstlParams;
-
 };
 
 /// A set of MSTL parameters.
