@@ -469,12 +469,43 @@ double strength(const std::vector<T>& component, const std::vector<T>& remainder
 
 } // namespace detail
 
+/// A set of STL parameters.
+struct StlParams {
+    /// Sets the length of the seasonal smoother.
+    std::optional<size_t> seasonal_length = std::nullopt;
+    /// Sets the length of the trend smoother.
+    std::optional<size_t> trend_length = std::nullopt;
+    /// Sets the length of the low-pass filter.
+    std::optional<size_t> low_pass_length = std::nullopt;
+    /// Sets the degree of locally-fitted polynomial in seasonal smoothing.
+    int seasonal_degree = 0;
+    /// Sets the degree of locally-fitted polynomial in trend smoothing.
+    int trend_degree = 1;
+    /// Sets the degree of locally-fitted polynomial in low-pass smoothing.
+    std::optional<int> low_pass_degree = std::nullopt;
+    /// Sets the skipping value for seasonal smoothing.
+    std::optional<size_t> seasonal_jump = std::nullopt;
+    /// Sets the skipping value for trend smoothing.
+    std::optional<size_t> trend_jump = std::nullopt;
+    /// Sets the skipping value for low-pass smoothing.
+    std::optional<size_t> low_pass_jump = std::nullopt;
+    /// Sets the number of loops for updating the seasonal and trend components.
+    std::optional<size_t> inner_loops = std::nullopt;
+    /// Sets the number of iterations of robust fitting.
+    std::optional<size_t> outer_loops = std::nullopt;
+    /// Sets whether robustness iterations are to be used.
+    bool robust = false;
+};
+
 /// A STL result.
 template<typename T = float>
-class StlResult {
+class Stl {
   public:
-    /// @private
-    StlResult() = default;
+    /// Decomposes a time series from a vector.
+    Stl(const std::vector<T>& series, size_t period, const StlParams& params = StlParams());
+
+    /// Decomposes a time series from a span.
+    Stl(std::span<const T> series, size_t period, const StlParams& params = StlParams());
 
     /// Returns the seasonal component.
     const std::vector<T>& seasonal() const {
@@ -507,134 +538,14 @@ class StlResult {
     }
 
   private:
-    StlResult(
-        std::vector<T>&& seasonal,
-        std::vector<T>&& trend,
-        std::vector<T>&& remainder,
-        std::vector<T>&& weights
-    ) :
-        seasonal_{std::move(seasonal)},
-        trend_{std::move(trend)},
-        remainder_{std::move(remainder)},
-        weights_{std::move(weights)} {
-    }
-
-    friend class StlParams;
-
     std::vector<T> seasonal_;
     std::vector<T> trend_;
     std::vector<T> remainder_;
     std::vector<T> weights_;
 };
 
-/// A set of STL parameters.
-class StlParams {
-  public:
-    /// @private
-    std::optional<size_t> ns_ = std::nullopt;
-
-  private:
-    std::optional<size_t> nt_ = std::nullopt;
-    std::optional<size_t> nl_ = std::nullopt;
-    int isdeg_ = 0;
-    int itdeg_ = 1;
-    std::optional<int> ildeg_ = std::nullopt;
-    std::optional<size_t> nsjump_ = std::nullopt;
-    std::optional<size_t> ntjump_ = std::nullopt;
-    std::optional<size_t> nljump_ = std::nullopt;
-    std::optional<size_t> ni_ = std::nullopt;
-    std::optional<size_t> no_ = std::nullopt;
-    bool robust_ = false;
-
-  public:
-    /// Sets the length of the seasonal smoother.
-    StlParams seasonal_length(size_t length) {
-        this->ns_ = length;
-        return *this;
-    }
-
-    /// Sets the length of the trend smoother.
-    StlParams trend_length(size_t length) {
-        this->nt_ = length;
-        return *this;
-    }
-
-    /// Sets the length of the low-pass filter.
-    StlParams low_pass_length(size_t length) {
-        this->nl_ = length;
-        return *this;
-    }
-
-    /// Sets the degree of locally-fitted polynomial in seasonal smoothing.
-    StlParams seasonal_degree(int degree) {
-        this->isdeg_ = degree;
-        return *this;
-    }
-
-    /// Sets the degree of locally-fitted polynomial in trend smoothing.
-    StlParams trend_degree(int degree) {
-        this->itdeg_ = degree;
-        return *this;
-    }
-
-    /// Sets the degree of locally-fitted polynomial in low-pass smoothing.
-    StlParams low_pass_degree(int degree) {
-        this->ildeg_ = degree;
-        return *this;
-    }
-
-    /// Sets the skipping value for seasonal smoothing.
-    StlParams seasonal_jump(size_t jump) {
-        this->nsjump_ = jump;
-        return *this;
-    }
-
-    /// Sets the skipping value for trend smoothing.
-    StlParams trend_jump(size_t jump) {
-        this->ntjump_ = jump;
-        return *this;
-    }
-
-    /// Sets the skipping value for low-pass smoothing.
-    StlParams low_pass_jump(size_t jump) {
-        this->nljump_ = jump;
-        return *this;
-    }
-
-    /// Sets the number of loops for updating the seasonal and trend components.
-    StlParams inner_loops(size_t loops) {
-        this->ni_ = loops;
-        return *this;
-    }
-
-    /// Sets the number of iterations of robust fitting.
-    StlParams outer_loops(size_t loops) {
-        this->no_ = loops;
-        return *this;
-    }
-
-    /// Sets whether robustness iterations are to be used.
-    StlParams robust(bool robust) {
-        this->robust_ = robust;
-        return *this;
-    }
-
-    /// Decomposes a time series from a vector.
-    template<typename T>
-    StlResult<T> fit(const std::vector<T>& series, size_t period) const;
-
-    /// Decomposes a time series from a span.
-    template<typename T>
-    StlResult<T> fit(std::span<const T> series, size_t period) const;
-};
-
-/// Creates a new set of STL parameters.
-inline StlParams params() {
-    return StlParams{};
-}
-
 template<typename T>
-StlResult<T> StlParams::fit(std::span<const T> series, size_t period) const {
+Stl<T>::Stl(std::span<const T> series, size_t period, const StlParams& params) {
     std::span<const T> y = series;
     size_t np = period;
     size_t n = series.size();
@@ -643,17 +554,17 @@ StlResult<T> StlParams::fit(std::span<const T> series, size_t period) const {
         throw std::invalid_argument{"series has less than two periods"};
     }
 
-    size_t ns = this->ns_.value_or(np);
+    size_t ns = params.seasonal_length.value_or(np);
 
-    int isdeg = this->isdeg_;
-    int itdeg = this->itdeg_;
+    int isdeg = params.seasonal_degree;
+    int itdeg = params.trend_degree;
 
     std::vector<T> seasonal(n);
     std::vector<T> trend(n);
     std::vector<T> remainder;
     std::vector<T> weights(n);
 
-    int ildeg = this->ildeg_.value_or(itdeg);
+    int ildeg = params.low_pass_degree.value_or(itdeg);
     size_t newns = std::max(ns, static_cast<size_t>(3));
     if (newns % 2 == 0) {
         newns += 1;
@@ -661,23 +572,23 @@ StlResult<T> StlParams::fit(std::span<const T> series, size_t period) const {
 
     size_t newnp = std::max(np, static_cast<size_t>(2));
     auto nt = static_cast<size_t>(std::ceil((1.5 * static_cast<float>(newnp)) / (1.0 - 1.5 / static_cast<float>(newns))));
-    nt = this->nt_.value_or(nt);
+    nt = params.trend_length.value_or(nt);
     nt = std::max(nt, static_cast<size_t>(3));
     if (nt % 2 == 0) {
         nt += 1;
     }
 
-    size_t nl = this->nl_.value_or(newnp);
-    if (nl % 2 == 0 && !this->nl_.has_value()) {
+    size_t nl = params.low_pass_length.value_or(newnp);
+    if (nl % 2 == 0 && !params.low_pass_length.has_value()) {
         nl += 1;
     }
 
-    size_t ni = this->ni_.value_or(this->robust_ ? 1 : 2);
-    size_t no = this->no_.value_or(this->robust_ ? 15 : 0);
+    size_t ni = params.inner_loops.value_or(params.robust ? 1 : 2);
+    size_t no = params.outer_loops.value_or(params.robust ? 15 : 0);
 
-    size_t nsjump = this->nsjump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(newns) / 10.0)));
-    size_t ntjump = this->ntjump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nt) / 10.0)));
-    size_t nljump = this->nljump_.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nl) / 10.0)));
+    size_t nsjump = params.seasonal_jump.value_or(static_cast<size_t>(std::ceil(static_cast<float>(newns) / 10.0)));
+    size_t ntjump = params.trend_jump.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nt) / 10.0)));
+    size_t nljump = params.low_pass_jump.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nl) / 10.0)));
 
     detail::stl(y, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, weights, seasonal, trend);
 
@@ -686,25 +597,46 @@ StlResult<T> StlParams::fit(std::span<const T> series, size_t period) const {
         remainder.push_back(y[i] - seasonal.at(i) - trend.at(i));
     }
 
-    return StlResult<T> {
-        std::move(seasonal),
-        std::move(trend),
-        std::move(remainder),
-        std::move(weights)
-    };
+    seasonal_ = std::move(seasonal);
+    trend_ = std::move(trend);
+    remainder_ = std::move(remainder);
+    weights_ = std::move(weights);
 }
 
 template<typename T>
-StlResult<T> StlParams::fit(const std::vector<T>& series, size_t period) const {
-    return StlParams::fit(std::span{series}, period);
+Stl<T>::Stl(const std::vector<T>& series, size_t period, const StlParams& params) :
+    Stl(std::span{series}, period, params) {
 }
+
+/// A set of MSTL parameters.
+struct MstlParams {
+    /// Sets the number of iterations.
+    size_t iterations = 2;
+    /// Sets lambda for Box-Cox transformation.
+    std::optional<float> lambda = std::nullopt;
+    /// Sets the lengths of the seasonal smoothers.
+    std::optional<std::vector<size_t>> seasonal_lengths = std::nullopt;
+    /// Sets the STL parameters.
+    StlParams stl_params = StlParams();
+};
 
 /// A MSTL result.
 template<typename T = float>
-class MstlResult {
+class Mstl {
   public:
-    /// @private
-    MstlResult() = default;
+    /// Decomposes a time series from a vector.
+    Mstl(
+        const std::vector<T>& series,
+        const std::vector<size_t>& periods,
+        const MstlParams& params = MstlParams()
+    );
+
+    /// Decomposes a time series from a span.
+    Mstl(
+        std::span<const T> series,
+        std::span<const size_t> periods,
+        const MstlParams& params = MstlParams()
+    );
 
     /// Returns the seasonal component.
     const std::vector<std::vector<T>>& seasonal() const {
@@ -736,68 +668,10 @@ class MstlResult {
     }
 
   private:
-    MstlResult(
-        std::vector<std::vector<T>>&& seasonal,
-        std::vector<T>&& trend,
-        std::vector<T>&& remainder
-    ) :
-        seasonal_{std::move(seasonal)},
-        trend_{std::move(trend)},
-        remainder_{std::move(remainder)} {
-    }
-
-    friend class MstlParams;
-
     std::vector<std::vector<T>> seasonal_;
     std::vector<T> trend_;
     std::vector<T> remainder_;
 };
-
-/// A set of MSTL parameters.
-class MstlParams {
-    size_t iterate_ = 2;
-    std::optional<float> lambda_ = std::nullopt;
-    std::optional<std::vector<size_t>> swin_ = std::nullopt;
-    StlParams stl_params_;
-
-  public:
-    /// Sets the number of iterations.
-    MstlParams iterations(size_t iterations) {
-        this->iterate_ = iterations;
-        return *this;
-    }
-
-    /// Sets lambda for Box-Cox transformation.
-    MstlParams lambda(float lambda) {
-        this->lambda_ = lambda;
-        return *this;
-    }
-
-    /// Sets the lengths of the seasonal smoothers.
-    MstlParams seasonal_lengths(const std::vector<size_t>& lengths) {
-        this->swin_ = lengths;
-        return *this;
-    }
-
-    /// Sets the STL parameters.
-    MstlParams stl_params(const StlParams& stl_params) {
-        this->stl_params_ = stl_params;
-        return *this;
-    }
-
-    /// Decomposes a time series from a vector.
-    template<typename T>
-    MstlResult<T> fit(const std::vector<T>& series, const std::vector<size_t>& periods) const;
-
-    /// Decomposes a time series from a span.
-    template<typename T>
-    MstlResult<T> fit(std::span<const T> series, std::span<const size_t> periods) const;
-};
-
-/// Creates a new set of MSTL parameters.
-inline MstlParams mstl_params() {
-    return MstlParams{};
-}
 
 namespace detail {
 
@@ -862,16 +736,13 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
                     }
                 }
 
-                StlResult<T> fit;
+                StlParams params = stl_params;
                 if (swin) {
-                    StlParams clone = stl_params;
-                    fit = clone.seasonal_length(swin.value().at(idx)).fit(deseas, seas_ids.at(idx));
-                } else if (stl_params.ns_.has_value()) {
-                    fit = stl_params.fit(deseas, seas_ids.at(idx));
-                } else {
-                    StlParams clone = stl_params;
-                    fit = clone.seasonal_length(7 + 4 * (i + 1)).fit(deseas, seas_ids.at(idx));
+                    params.seasonal_length = swin.value().at(idx);
+                } else if (!stl_params.seasonal_length.has_value()) {
+                    params.seasonal_length = 7 + 4 * (i + 1);
                 }
+                Stl<T> fit{deseas, seas_ids.at(idx), params};
 
                 seasonality.at(idx) = fit.seasonal();
                 trend = fit.trend();
@@ -898,7 +769,11 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
 } // namespace detail
 
 template<typename T>
-MstlResult<T> MstlParams::fit(std::span<const T> series, std::span<const size_t> periods) const {
+Mstl<T>::Mstl(
+    std::span<const T> series,
+    std::span<const size_t> periods,
+    const MstlParams& params
+) {
     // return error to be consistent with stl
     // and ensure seasonal is always same length as periods
     for (auto v : periods) {
@@ -915,16 +790,15 @@ MstlResult<T> MstlParams::fit(std::span<const T> series, std::span<const size_t>
         }
     }
 
-    if (lambda_.has_value()) {
-        float lambda = lambda_.value();
+    if (params.lambda.has_value()) {
+        float lambda = params.lambda.value();
         if (lambda < 0 || lambda > 1) {
             throw std::invalid_argument{"lambda must be between 0 and 1"};
         }
     }
 
-    if (swin_.has_value()) {
-        const std::vector<size_t>& swin = swin_.value();
-        if (swin.size() != periods.size()) {
+    if (params.seasonal_lengths.has_value()) {
+        if (params.seasonal_lengths.value().size() != periods.size()) {
             throw std::invalid_argument{"seasonal_lengths must have the same length as periods"};
         }
     }
@@ -933,25 +807,24 @@ MstlResult<T> MstlParams::fit(std::span<const T> series, std::span<const size_t>
         series,
         // copy to support bounds checking before C++26
         std::vector(periods.begin(), periods.end()),
-        iterate_,
-        lambda_,
-        swin_,
-        stl_params_
+        params.iterations,
+        params.lambda,
+        params.seasonal_lengths,
+        params.stl_params
     );
 
-    return MstlResult<T> {
-        std::move(seasonal),
-        std::move(trend),
-        std::move(remainder)
-    };
+    seasonal_ = std::move(seasonal);
+    trend_ = std::move(trend);
+    remainder_ = std::move(remainder);
 }
 
 template<typename T>
-MstlResult<T> MstlParams::fit(
+Mstl<T>::Mstl(
     const std::vector<T>& series,
-    const std::vector<size_t>& periods
-) const {
-    return MstlParams::fit(std::span{series}, std::span{periods});
+    const std::vector<size_t>& periods,
+    const MstlParams& params
+) :
+    Mstl(std::span{series}, std::span{periods}, params) {
 }
 
 } // namespace stl
