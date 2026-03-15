@@ -39,7 +39,10 @@ void assert_elements_in_delta(const std::vector<double>& exp, const std::vector<
 }
 
 template<typename T>
-void assert_exception(const std::function<void(void)>& code, std::optional<std::string_view> message = std::nullopt) {
+void assert_exception(
+    const std::function<void(void)>& code,
+    std::optional<std::string_view> message = std::nullopt
+) {
     std::optional<T> exception;
     try {
         code();

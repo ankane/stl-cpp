@@ -221,7 +221,13 @@ void ma(const std::vector<T>& x, size_t n, size_t len, std::vector<T>& ave) {
 }
 
 template<typename T>
-void fts(const std::vector<T>& x, size_t n, size_t np, std::vector<T>& trend, std::vector<T>& work) {
+void fts(
+    const std::vector<T>& x,
+    size_t n,
+    size_t np,
+    std::vector<T>& trend,
+    std::vector<T>& work
+) {
     ma(x, n, np, trend);
     ma(trend, n - np + 1, np, work);
     ma(work, n - 2 * np + 2, 3, trend);
@@ -877,7 +883,10 @@ MstlResult<T> MstlParams::fit(std::span<const T> series, std::span<const size_t>
 }
 
 template<typename T>
-MstlResult<T> MstlParams::fit(const std::vector<T>& series, const std::vector<size_t>& periods) const {
+MstlResult<T> MstlParams::fit(
+    const std::vector<T>& series,
+    const std::vector<size_t>& periods
+) const {
     return MstlParams::fit(std::span{series}, std::span{periods});
 }
 
