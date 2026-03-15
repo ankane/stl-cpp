@@ -13,7 +13,7 @@ int main() {
     size_t period = 7; // period of seasonal component
 
     auto res = stl::params().fit(series, period);
-    for (auto v : res.trend) {
+    for (auto v : res.trend()) {
         std::cout << v << std::endl;
     }
 

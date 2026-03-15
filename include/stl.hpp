@@ -477,25 +477,33 @@ class StlResult {
     StlResult() = default;
 
     /// Returns the seasonal component.
-    std::vector<T> seasonal;
+    const std::vector<T>& seasonal() const {
+        return seasonal_;
+    }
 
     /// Returns the trend component.
-    std::vector<T> trend;
+    const std::vector<T>& trend() const {
+        return trend_;
+    }
 
     /// Returns the remainder.
-    std::vector<T> remainder;
+    const std::vector<T>& remainder() const {
+        return remainder_;
+    }
 
     /// Returns the weights.
-    std::vector<T> weights;
+    const std::vector<T>& weights() const {
+        return weights_;
+    }
 
     /// Returns the seasonal strength.
     double seasonal_strength() const {
-        return detail::strength(seasonal, remainder);
+        return detail::strength(seasonal_, remainder_);
     }
 
     /// Returns the trend strength.
     double trend_strength() const {
-        return detail::strength(trend, remainder);
+        return detail::strength(trend_, remainder_);
     }
 
   private:
@@ -505,13 +513,18 @@ class StlResult {
         std::vector<T>&& remainder,
         std::vector<T>&& weights
     ) :
-        seasonal{std::move(seasonal)},
-        trend{std::move(trend)},
-        remainder{std::move(remainder)},
-        weights{std::move(weights)} {
+        seasonal_{std::move(seasonal)},
+        trend_{std::move(trend)},
+        remainder_{std::move(remainder)},
+        weights_{std::move(weights)} {
     }
 
     friend class StlParams;
+
+    std::vector<T> seasonal_;
+    std::vector<T> trend_;
+    std::vector<T> remainder_;
+    std::vector<T> weights_;
 };
 
 /// A set of STL parameters.
@@ -694,26 +707,32 @@ class MstlResult {
     MstlResult() = default;
 
     /// Returns the seasonal component.
-    std::vector<std::vector<T>> seasonal;
+    const std::vector<std::vector<T>>& seasonal() const {
+        return seasonal_;
+    }
 
     /// Returns the trend component.
-    std::vector<T> trend;
+    const std::vector<T>& trend() const {
+        return trend_;
+    }
 
     /// Returns the remainder.
-    std::vector<T> remainder;
+    const std::vector<T>& remainder() const {
+        return remainder_;
+    }
 
     /// Returns the seasonal strength.
     std::vector<double> seasonal_strength() const {
         std::vector<double> res;
-        for (const auto& s : seasonal) {
-            res.push_back(detail::strength(s, remainder));
+        for (const auto& s : seasonal_) {
+            res.push_back(detail::strength(s, remainder_));
         }
         return res;
     }
 
     /// Returns the trend strength.
     double trend_strength() const {
-        return detail::strength(trend, remainder);
+        return detail::strength(trend_, remainder_);
     }
 
   private:
@@ -722,12 +741,16 @@ class MstlResult {
         std::vector<T>&& trend,
         std::vector<T>&& remainder
     ) :
-        seasonal{std::move(seasonal)},
-        trend{std::move(trend)},
-        remainder{std::move(remainder)} {
+        seasonal_{std::move(seasonal)},
+        trend_{std::move(trend)},
+        remainder_{std::move(remainder)} {
     }
 
     friend class MstlParams;
+
+    std::vector<std::vector<T>> seasonal_;
+    std::vector<T> trend_;
+    std::vector<T> remainder_;
 };
 
 /// A set of MSTL parameters.
@@ -850,8 +873,8 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
                     fit = clone.seasonal_length(7 + 4 * (i + 1)).fit(deseas, seas_ids.at(idx));
                 }
 
-                seasonality.at(idx) = fit.seasonal;
-                trend = fit.trend;
+                seasonality.at(idx) = fit.seasonal();
+                trend = fit.trend();
 
                 for (size_t ii = 0; ii < deseas.size(); ii++) {
                     deseas.at(ii) -= seasonality.at(idx).at(ii);
