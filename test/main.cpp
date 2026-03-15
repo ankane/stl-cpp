@@ -1,6 +1,3 @@
-// Test ODR
-#include <stl.hpp>
-
 void test_stl();
 void test_mstl();
 
