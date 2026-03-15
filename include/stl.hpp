@@ -497,7 +497,7 @@ struct StlParams {
     bool robust = false;
 };
 
-/// A STL result.
+/// Seasonal-trend decomposition using Loess (STL).
 template<typename T = float>
 class Stl {
   public:
@@ -620,7 +620,7 @@ struct MstlParams {
     StlParams stl_params = StlParams();
 };
 
-/// A MSTL result.
+/// Multiple seasonal-trend decomposition using Loess (MSTL).
 template<typename T = float>
 class Mstl {
   public:
