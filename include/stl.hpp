@@ -763,7 +763,7 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
     for (size_t i = 0; i < seas_ids.size(); i++) {
         indices.push_back(i);
     }
-    std::sort(indices.begin(), indices.end(), [&seas_ids](size_t a, size_t b) {
+    std::ranges::sort(indices, [&seas_ids](size_t a, size_t b) {
         return seas_ids.at(a) < seas_ids.at(b);
     });
 
