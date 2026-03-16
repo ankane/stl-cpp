@@ -261,8 +261,7 @@ void rwts(std::span<const T> y, const std::vector<T>& fit, std::vector<T>& rw) {
     size_t mid2 = n / 2;
 
     // sort
-    // TODO checked cast
-    std::sort(rw.begin(), rw.begin() + static_cast<std::ptrdiff_t>(n));
+    std::ranges::sort(rw);
 
     T cmad = static_cast<T>(3.0) * (rw.at(mid1) + rw.at(mid2)); // 6 * median abs resid
     T c9 = static_cast<T>(0.999) * cmad;
