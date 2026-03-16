@@ -38,7 +38,7 @@ bool est(
     size_t len,
     int ideg,
     T xs,
-    T* ys,
+    T& ys,
     size_t nleft,
     size_t nright,
     std::vector<T>& w,
@@ -104,9 +104,9 @@ bool est(
             }
         }
 
-        *ys = 0.0;
+        ys = 0.0;
         for (size_t j = nleft; j <= nright; j++) {
-            *ys += w.at(j - 1) * y.at(j - 1);
+            ys += w.at(j - 1) * y.at(j - 1);
         }
 
         return true;
@@ -139,7 +139,7 @@ void ess(
         nright = n;
         for (size_t i = 1; i <= n; i += newnj) {
             bool ok = est(
-                y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw
+                y, n, len, ideg, static_cast<T>(i), ys[i - 1], nleft, nright, res, userw, rw
             );
             if (!ok) {
                 ys[i - 1] = y.at(i - 1);
@@ -157,7 +157,7 @@ void ess(
                 nright += 1;
             }
             bool ok = est(
-                y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw
+                y, n, len, ideg, static_cast<T>(i), ys[i - 1], nleft, nright, res, userw, rw
             );
             if (!ok) {
                 ys[i - 1] = y.at(i - 1);
@@ -179,7 +179,7 @@ void ess(
                 nright = len + i - nsh;
             }
             bool ok = est(
-                y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw
+                y, n, len, ideg, static_cast<T>(i), ys[i - 1], nleft, nright, res, userw, rw
             );
             if (!ok) {
                 ys[i - 1] = y.at(i - 1);
@@ -197,7 +197,7 @@ void ess(
         size_t k = ((n - 1) / newnj) * newnj + 1;
         if (k != n) {
             bool ok = est(
-                y, n, len, ideg, static_cast<T>(n), &ys[n - 1], nleft, nright, res, userw, rw
+                y, n, len, ideg, static_cast<T>(n), ys[n - 1], nleft, nright, res, userw, rw
             );
             if (!ok) {
                 ys[n - 1] = y.at(n - 1);
@@ -309,7 +309,7 @@ void ss(
         ess(work1, k, ns, isdeg, nsjump, userw, work3, std::span{work2}.subspan(1), work4);
         T xs = 0.0;
         size_t nright = std::min(ns, k);
-        bool ok = est(work1, k, ns, isdeg, xs, &work2.at(0), 1, nright, work4, userw, work3);
+        bool ok = est(work1, k, ns, isdeg, xs, work2.at(0), 1, nright, work4, userw, work3);
         if (!ok) {
             work2.at(0) = work2.at(1);
         }
@@ -317,7 +317,7 @@ void ss(
         size_t nleft = static_cast<size_t>(
             std::max(1, static_cast<int>(k) - static_cast<int>(ns) + 1)
         );
-        ok = est(work1, k, ns, isdeg, xs, &work2.at(k + 1), nleft, k, work4, userw, work3);
+        ok = est(work1, k, ns, isdeg, xs, work2.at(k + 1), nleft, k, work4, userw, work3);
         if (!ok) {
             work2.at(k + 1) = work2.at(k);
         }
