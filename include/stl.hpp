@@ -252,12 +252,11 @@ void fts(
 
 template<typename T>
 void rwts(std::span<const T> y, const std::vector<T>& fit, std::vector<T>& rw) {
-    size_t n = y.size();
-
-    for (size_t i = 0; i < n; i++) {
+    for (size_t i = 0; i < y.size(); i++) {
         rw.at(i) = std::abs(y[i] - fit.at(i));
     }
 
+    size_t n = y.size();
     size_t mid1 = (n - 1) / 2;
     size_t mid2 = n / 2;
 
@@ -269,7 +268,7 @@ void rwts(std::span<const T> y, const std::vector<T>& fit, std::vector<T>& rw) {
     T c9 = static_cast<T>(0.999) * cmad;
     T c1 = static_cast<T>(0.001) * cmad;
 
-    for (size_t i = 0; i < n; i++) {
+    for (size_t i = 0; i < y.size(); i++) {
         T r = std::abs(y[i] - fit.at(i));
         if (r <= c1) {
             rw.at(i) = 1.0;
@@ -356,7 +355,7 @@ void onestp(
     size_t n = y.size();
 
     for (size_t j = 0; j < ni; j++) {
-        for (size_t i = 0; i < n; i++) {
+        for (size_t i = 0; i < y.size(); i++) {
             work1.at(i) = y[i] - trend.at(i);
         }
 
@@ -366,7 +365,7 @@ void onestp(
         for (size_t i = 0; i < n; i++) {
             season.at(i) = work2.at(np + i) - work1.at(i);
         }
-        for (size_t i = 0; i < n; i++) {
+        for (size_t i = 0; i < y.size(); i++) {
             work1.at(i) = y[i] - season.at(i);
         }
         ess(work1, n, nt, itdeg, ntjump, userw, rw, std::span{trend}, work3);
@@ -651,7 +650,7 @@ Stl<T>::Stl(std::span<const T> series, size_t period, const StlParams& params) {
     );
 
     remainder.reserve(n);
-    for (size_t i = 0; i < n; i++) {
+    for (size_t i = 0; i < y.size(); i++) {
         remainder.push_back(y[i] - seasonal.at(i) - trend.at(i));
     }
 
