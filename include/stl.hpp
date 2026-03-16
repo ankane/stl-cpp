@@ -605,8 +605,7 @@ Stl<T>::Stl(std::span<const T> series, size_t period, const StlParams& params) {
 
 template<typename T>
 Stl<T>::Stl(const std::vector<T>& series, size_t period, const StlParams& params) :
-    Stl(std::span{series}, period, params) {
-}
+    Stl(std::span{series}, period, params) {}
 
 /// A set of MSTL parameters.
 struct MstlParams {
@@ -719,7 +718,9 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
     seasonality.reserve(seas_ids.size());
     std::vector<T> trend;
 
-    std::vector<T> deseas = lambda.has_value() ? box_cox(x, lambda.value()) : std::vector<T>(x.begin(), x.end());
+    std::vector<T> deseas = lambda.has_value()
+        ? box_cox(x, lambda.value())
+        : std::vector<T>(x.begin(), x.end());
 
     if (!seas_ids.empty()) {
         for (size_t i = 0; i < seas_ids.size(); i++) {
@@ -824,7 +825,6 @@ Mstl<T>::Mstl(
     const std::vector<size_t>& periods,
     const MstlParams& params
 ) :
-    Mstl(std::span{series}, std::span{periods}, params) {
-}
+    Mstl(std::span{series}, std::span{periods}, params) {}
 
 } // namespace stl
