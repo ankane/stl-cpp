@@ -758,11 +758,8 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
 ) {
     // keep track of indices instead of sorting seas_ids
     // so order is preserved with seasonality
-    std::vector<size_t> indices;
-    indices.reserve(seas_ids.size());
-    for (size_t i = 0; i < seas_ids.size(); i++) {
-        indices.push_back(i);
-    }
+    std::vector<size_t> indices(seas_ids.size());
+    std::iota(indices.begin(), indices.end(), 0);
     std::ranges::sort(indices, [&seas_ids](size_t a, size_t b) {
         return seas_ids.at(a) < seas_ids.at(b);
     });
