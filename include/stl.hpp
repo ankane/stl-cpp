@@ -711,6 +711,7 @@ class Mstl {
     /// Returns the seasonal strength.
     std::vector<double> seasonal_strength() const {
         std::vector<double> res;
+        res.reserve(seasonal_.size());
         for (const auto& s : seasonal_) {
             res.push_back(detail::strength(s, remainder_));
         }
