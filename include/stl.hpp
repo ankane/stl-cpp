@@ -138,7 +138,9 @@ void ess(
         nleft = 1;
         nright = n;
         for (size_t i = 1; i <= n; i += newnj) {
-            bool ok = est(y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw);
+            bool ok = est(
+                y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw
+            );
             if (!ok) {
                 ys[i - 1] = y.at(i - 1);
             }
@@ -154,7 +156,9 @@ void ess(
                 nleft += 1;
                 nright += 1;
             }
-            bool ok = est(y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw);
+            bool ok = est(
+                y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw
+            );
             if (!ok) {
                 ys[i - 1] = y.at(i - 1);
             }
@@ -174,7 +178,9 @@ void ess(
                 nleft = i - nsh + 1;
                 nright = len + i - nsh;
             }
-            bool ok = est(y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw);
+            bool ok = est(
+                y, n, len, ideg, static_cast<T>(i), &ys[i - 1], nleft, nright, res, userw, rw
+            );
             if (!ok) {
                 ys[i - 1] = y.at(i - 1);
             }
@@ -190,7 +196,9 @@ void ess(
         }
         size_t k = ((n - 1) / newnj) * newnj + 1;
         if (k != n) {
-            bool ok = est(y, n, len, ideg, static_cast<T>(n), &ys[n - 1], nleft, nright, res, userw, rw);
+            bool ok = est(
+                y, n, len, ideg, static_cast<T>(n), &ys[n - 1], nleft, nright, res, userw, rw
+            );
             if (!ok) {
                 ys[n - 1] = y.at(n - 1);
             }
@@ -308,7 +316,9 @@ void ss(
             work2.at(0) = work2.at(1);
         }
         xs = static_cast<T>(k + 1);
-        size_t nleft = static_cast<size_t>(std::max(1, static_cast<int>(k) - static_cast<int>(ns) + 1));
+        size_t nleft = static_cast<size_t>(
+            std::max(1, static_cast<int>(k) - static_cast<int>(ns) + 1)
+        );
         ok = est(work1, k, ns, isdeg, xs, &work2.at(k + 1), nleft, k, work4, userw, work3);
         if (!ok) {
             work2.at(k + 1) = work2.at(k);
@@ -427,7 +437,29 @@ void stl(
     size_t k = 0;
 
     while (true) {
-        onestp(y, np, ns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, userw, rw, season, trend, work1, work2, work3, work4, work5);
+        onestp(
+            y,
+            np,
+            ns,
+            nt,
+            nl,
+            isdeg,
+            itdeg,
+            ildeg,
+            nsjump,
+            ntjump,
+            nljump,
+            ni,
+            userw,
+            rw,
+            season,
+            trend,
+            work1,
+            work2,
+            work3,
+            work4,
+            work5
+        );
         k += 1;
         if (k > no) {
             break;
@@ -448,7 +480,8 @@ void stl(
 
 template<typename T>
 double var(const std::vector<T>& series) {
-    double mean = std::accumulate(series.begin(), series.end(), 0.0) / static_cast<double>(series.size());
+    double mean = std::accumulate(series.begin(), series.end(), 0.0)
+        / static_cast<double>(series.size());
     double sum = 0.0;
     for (auto v : series) {
         double diff = v - mean;
@@ -571,7 +604,9 @@ Stl<T>::Stl(std::span<const T> series, size_t period, const StlParams& params) {
     }
 
     size_t newnp = std::max(np, static_cast<size_t>(2));
-    auto nt = static_cast<size_t>(std::ceil((1.5 * static_cast<float>(newnp)) / (1.0 - 1.5 / static_cast<float>(newns))));
+    auto nt = static_cast<size_t>(
+        std::ceil((1.5 * static_cast<float>(newnp)) / (1.0 - 1.5 / static_cast<float>(newns)))
+    );
     nt = params.trend_length.value_or(nt);
     nt = std::max(nt, static_cast<size_t>(3));
     if (nt % 2 == 0) {
@@ -586,11 +621,34 @@ Stl<T>::Stl(std::span<const T> series, size_t period, const StlParams& params) {
     size_t ni = params.inner_loops.value_or(params.robust ? 1 : 2);
     size_t no = params.outer_loops.value_or(params.robust ? 15 : 0);
 
-    size_t nsjump = params.seasonal_jump.value_or(static_cast<size_t>(std::ceil(static_cast<float>(newns) / 10.0)));
-    size_t ntjump = params.trend_jump.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nt) / 10.0)));
-    size_t nljump = params.low_pass_jump.value_or(static_cast<size_t>(std::ceil(static_cast<float>(nl) / 10.0)));
+    size_t nsjump = params.seasonal_jump.value_or(
+        static_cast<size_t>(std::ceil(static_cast<float>(newns) / 10.0))
+    );
+    size_t ntjump = params.trend_jump.value_or(
+        static_cast<size_t>(std::ceil(static_cast<float>(nt) / 10.0))
+    );
+    size_t nljump = params.low_pass_jump.value_or(
+        static_cast<size_t>(std::ceil(static_cast<float>(nl) / 10.0))
+    );
 
-    detail::stl(y, newnp, newns, nt, nl, isdeg, itdeg, ildeg, nsjump, ntjump, nljump, ni, no, weights, seasonal, trend);
+    detail::stl(
+        y,
+        newnp,
+        newns,
+        nt,
+        nl,
+        isdeg,
+        itdeg,
+        ildeg,
+        nsjump,
+        ntjump,
+        nljump,
+        ni,
+        no,
+        weights,
+        seasonal,
+        trend
+    );
 
     remainder.reserve(n);
     for (size_t i = 0; i < n; i++) {
