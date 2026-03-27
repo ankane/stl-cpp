@@ -581,7 +581,7 @@ Stl<T>::Stl(std::span<const T> series, size_t period, const StlParams& params) {
     size_t np = period;
     size_t n = series.size();
 
-    if (n < 2 * np) {
+    if (n / 2 < np) {
         throw std::invalid_argument{"series has less than two periods"};
     }
 
