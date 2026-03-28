@@ -1,5 +1,7 @@
 ## 0.3.0 (unreleased)
 
+- Replaced `fit` function with `Stl` and `Mstl` constructors
+- Changed functions to data members for `StlParams` and `MstlParams`
 - Changed `seasonal`, `trend`, `remainder`, and `weights` to functions
 - Dropped support for C++17
 
