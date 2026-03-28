@@ -765,7 +765,7 @@ std::vector<T> box_cox(std::span<const T> y, float lambda) {
 template<typename T>
 std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
     std::span<const T> x,
-    const std::vector<size_t>& seas_ids,
+    std::span<const size_t> seas_ids,
     size_t iterate,
     std::optional<float> lambda,
     const std::optional<std::vector<size_t>>& swin,
@@ -776,7 +776,7 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
     std::vector<size_t> indices(seas_ids.size());
     std::iota(indices.begin(), indices.end(), 0);
     std::ranges::sort(indices, [&seas_ids](size_t a, size_t b) {
-        return seas_ids.at(a) < seas_ids.at(b);
+        return span_at(seas_ids, a) < span_at(seas_ids, b);
     });
 
     if (seas_ids.size() == 1) {
@@ -812,7 +812,7 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
                 } else if (!stl_params.seasonal_length.has_value()) {
                     params.seasonal_length = 7 + 4 * (i + 1);
                 }
-                Stl<T> fit{deseas, seas_ids.at(idx), params};
+                Stl<T> fit{deseas, span_at(seas_ids, idx), params};
 
                 seasonality.at(idx) = fit.seasonal();
                 trend = fit.trend();
@@ -875,8 +875,7 @@ Mstl<T>::Mstl(
 
     auto [trend, remainder, seasonal] = detail::mstl(
         series,
-        // copy to support bounds checking before C++26
-        std::vector(periods.begin(), periods.end()),
+        periods,
         params.iterations,
         params.lambda,
         params.seasonal_lengths,
