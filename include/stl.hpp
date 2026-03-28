@@ -31,6 +31,15 @@ namespace stl {
 
 namespace detail {
 
+// TODO use span.at() for C++26
+template<typename T>
+T& span_at(std::span<T> sp, size_t pos) {
+    if (pos >= sp.size()) [[unlikely]] {
+        throw std::out_of_range("pos >= size()");
+    }
+    return sp[pos];
+}
+
 template<typename T>
 bool est(
     const std::vector<T>& y,
@@ -126,7 +135,7 @@ void ess(
     std::vector<T>& res
 ) {
     if (n < 2) {
-        ys[0] = y.at(0);
+        span_at(ys, 0) = y.at(0);
         return;
     }
 
@@ -139,10 +148,10 @@ void ess(
         nright = n;
         for (size_t i = 1; i <= n; i += newnj) {
             bool ok = est(
-                y, n, len, ideg, static_cast<T>(i), ys[i - 1], nleft, nright, res, userw, rw
+                y, n, len, ideg, static_cast<T>(i), span_at(ys, i - 1), nleft, nright, res, userw, rw
             );
             if (!ok) {
-                ys[i - 1] = y.at(i - 1);
+                span_at(ys, i - 1) = y.at(i - 1);
             }
         }
     } else if (newnj == 1) {
@@ -157,10 +166,10 @@ void ess(
                 nright += 1;
             }
             bool ok = est(
-                y, n, len, ideg, static_cast<T>(i), ys[i - 1], nleft, nright, res, userw, rw
+                y, n, len, ideg, static_cast<T>(i), span_at(ys, i - 1), nleft, nright, res, userw, rw
             );
             if (!ok) {
-                ys[i - 1] = y.at(i - 1);
+                span_at(ys, i - 1) = y.at(i - 1);
             }
         }
     } else {
@@ -179,33 +188,33 @@ void ess(
                 nright = len + i - nsh;
             }
             bool ok = est(
-                y, n, len, ideg, static_cast<T>(i), ys[i - 1], nleft, nright, res, userw, rw
+                y, n, len, ideg, static_cast<T>(i), span_at(ys, i - 1), nleft, nright, res, userw, rw
             );
             if (!ok) {
-                ys[i - 1] = y.at(i - 1);
+                span_at(ys, i - 1) = y.at(i - 1);
             }
         }
     }
 
     if (newnj != 1) {
         for (size_t i = 1; i <= n - newnj; i += newnj) {
-            T delta = (ys[i + newnj - 1] - ys[i - 1]) / static_cast<T>(newnj);
+            T delta = (span_at(ys, i + newnj - 1) - span_at(ys, i - 1)) / static_cast<T>(newnj);
             for (size_t j = i + 1; j <= i + newnj - 1; j++) {
-                ys[j - 1] = ys[i - 1] + delta * static_cast<T>(j - i);
+                span_at(ys, j - 1) = span_at(ys, i - 1) + delta * static_cast<T>(j - i);
             }
         }
         size_t k = ((n - 1) / newnj) * newnj + 1;
         if (k != n) {
             bool ok = est(
-                y, n, len, ideg, static_cast<T>(n), ys[n - 1], nleft, nright, res, userw, rw
+                y, n, len, ideg, static_cast<T>(n), span_at(ys, n - 1), nleft, nright, res, userw, rw
             );
             if (!ok) {
-                ys[n - 1] = y.at(n - 1);
+                span_at(ys, n - 1) = y.at(n - 1);
             }
             if (k != n - 1) {
-                T delta = (ys[n - 1] - ys[k - 1]) / static_cast<T>(n - k);
+                T delta = (span_at(ys, n - 1) - span_at(ys, k - 1)) / static_cast<T>(n - k);
                 for (size_t j = k + 1; j <= n - 1; j++) {
-                    ys[j - 1] = ys[k - 1] + delta * static_cast<T>(j - k);
+                    span_at(ys, j - 1) = span_at(ys, k - 1) + delta * static_cast<T>(j - k);
                 }
             }
         }
@@ -252,8 +261,9 @@ void fts(
 
 template<typename T>
 void rwts(std::span<const T> y, const std::vector<T>& fit, std::vector<T>& rw) {
+    // TODO use std::views::zip for C++23
     for (size_t i = 0; i < y.size(); i++) {
-        rw.at(i) = std::abs(y[i] - fit.at(i));
+        rw.at(i) = std::abs(span_at(y, i) - fit.at(i));
     }
 
     size_t n = y.size();
@@ -267,8 +277,9 @@ void rwts(std::span<const T> y, const std::vector<T>& fit, std::vector<T>& rw) {
     T c9 = static_cast<T>(0.999) * cmad;
     T c1 = static_cast<T>(0.001) * cmad;
 
+    // TODO use std::views::zip for C++23
     for (size_t i = 0; i < y.size(); i++) {
-        T r = std::abs(y[i] - fit.at(i));
+        T r = std::abs(span_at(y, i) - fit.at(i));
         if (r <= c1) {
             rw.at(i) = 1.0;
         } else if (r <= c9) {
@@ -354,18 +365,21 @@ void onestp(
     size_t n = y.size();
 
     for (size_t j = 0; j < ni; j++) {
+        // TODO use std::views::zip for C++23
         for (size_t i = 0; i < y.size(); i++) {
-            work1.at(i) = y[i] - trend.at(i);
+            work1.at(i) = span_at(y, i) - trend.at(i);
         }
 
         ss(work1, n, np, ns, isdeg, nsjump, userw, rw, work2, work3, work4, work5, season);
         fts(work2, n + 2 * np, np, work3, work1);
         ess(work3, n, nl, ildeg, nljump, false, work4, std::span{work1}, work5);
+        // TODO use std::views::zip for C++23
         for (size_t i = 0; i < n; i++) {
             season.at(i) = work2.at(np + i) - work1.at(i);
         }
+        // TODO use std::views::zip for C++23
         for (size_t i = 0; i < y.size(); i++) {
-            work1.at(i) = y[i] - season.at(i);
+            work1.at(i) = span_at(y, i) - season.at(i);
         }
         ess(work1, n, nt, itdeg, ntjump, userw, rw, std::span{trend}, work3);
     }
@@ -649,8 +663,9 @@ Stl<T>::Stl(std::span<const T> series, size_t period, const StlParams& params) {
     );
 
     remainder.reserve(n);
+    // TODO use std::views::zip for C++23
     for (size_t i = 0; i < y.size(); i++) {
-        remainder.push_back(y[i] - seasonal.at(i) - trend.at(i));
+        remainder.push_back(detail::span_at(y, i) - seasonal.at(i) - trend.at(i));
     }
 
     seasonal_ = std::move(seasonal);
