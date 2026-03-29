@@ -148,7 +148,8 @@ void ess(
         nright = n;
         for (size_t i = 1; i <= n; i += newnj) {
             bool ok = est(
-                y, n, len, ideg, static_cast<T>(i), span_at(ys, i - 1), nleft, nright, res, userw, rw
+                y, n, len, ideg, static_cast<T>(i), span_at(ys, i - 1), nleft, nright, res, userw,
+                rw
             );
             if (!ok) {
                 span_at(ys, i - 1) = y.at(i - 1);
@@ -166,7 +167,8 @@ void ess(
                 nright += 1;
             }
             bool ok = est(
-                y, n, len, ideg, static_cast<T>(i), span_at(ys, i - 1), nleft, nright, res, userw, rw
+                y, n, len, ideg, static_cast<T>(i), span_at(ys, i - 1), nleft, nright, res, userw,
+                rw
             );
             if (!ok) {
                 span_at(ys, i - 1) = y.at(i - 1);
@@ -188,7 +190,8 @@ void ess(
                 nright = len + i - nsh;
             }
             bool ok = est(
-                y, n, len, ideg, static_cast<T>(i), span_at(ys, i - 1), nleft, nright, res, userw, rw
+                y, n, len, ideg, static_cast<T>(i), span_at(ys, i - 1), nleft, nright, res, userw,
+                rw
             );
             if (!ok) {
                 span_at(ys, i - 1) = y.at(i - 1);
@@ -206,7 +209,8 @@ void ess(
         size_t k = ((n - 1) / newnj) * newnj + 1;
         if (k != n) {
             bool ok = est(
-                y, n, len, ideg, static_cast<T>(n), span_at(ys, n - 1), nleft, nright, res, userw, rw
+                y, n, len, ideg, static_cast<T>(n), span_at(ys, n - 1), nleft, nright, res, userw,
+                rw
             );
             if (!ok) {
                 span_at(ys, n - 1) = y.at(n - 1);
