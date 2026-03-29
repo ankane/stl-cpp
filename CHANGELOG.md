@@ -1,4 +1,4 @@
-## 0.3.0 (unreleased)
+## 0.3.0 (2026-03-28)
 
 - Replaced `fit` function with `Stl` and `Mstl` constructors
 - Changed functions to data members for `StlParams` and `MstlParams`
