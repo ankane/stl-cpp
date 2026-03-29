@@ -859,7 +859,7 @@ Mstl<T>::Mstl(
     // return error to be consistent with stl
     // and ensure seasonal is always same length as periods
     for (auto v : periods) {
-        if (series.size() < v * 2) {
+        if (series.size() / 2 < v) {
             throw std::invalid_argument{"series has less than two periods"};
         }
     }
