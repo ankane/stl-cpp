@@ -6,7 +6,7 @@ Seasonal-trend decomposition for C++
 
 ## Installation
 
-Add [the header](https://raw.githubusercontent.com/ankane/stl-cpp/v0.2.0/include/stl.hpp) to your project (supports C++17 and greater).
+Add [the header](https://raw.githubusercontent.com/ankane/stl-cpp/v0.2.0/include/stl.hpp) to your project (supports C++20 and greater).
 
 There is also support for CMake and FetchContent:
 
@@ -30,8 +30,6 @@ Include the header
 Decompose a time series
 
 ```cpp
-using stl::StlResult;
-
 std::vector<float> series{
     5.0, 9.0, 2.0, 9.0, 0.0, 6.0, 3.0, 8.0, 5.0, 8.0,
     7.0, 8.0, 8.0, 0.0, 2.0, 5.0, 0.0, 5.0, 6.0, 7.0,
@@ -39,15 +37,15 @@ std::vector<float> series{
 };
 size_t period = 7; // period of seasonal component
 
-StlResult<float> res = stl::params().fit(series, period);
+stl::Stl fit{series, period};
 ```
 
 Get the components
 
 ```cpp
-const std::vector<float>& seasonal = res.seasonal;
-const std::vector<float>& trend = res.trend;
-const std::vector<float>& remainder = res.remainder;
+const std::vector<float>& seasonal = fit.seasonal();
+const std::vector<float>& trend = fit.trend();
+const std::vector<float>& remainder = fit.remainder();
 ```
 
 ## Robustness
@@ -55,13 +53,13 @@ const std::vector<float>& remainder = res.remainder;
 Use robustness iterations
 
 ```cpp
-StlResult<float> res = stl::params().robust(true).fit(series, period);
+stl::Stl fit{series, period, {.robust = true}};
 ```
 
 Get robustness weights
 
 ```cpp
-const std::vector<float>& weights = res.weights;
+const std::vector<float>& weights = fit.weights();
 ```
 
 ## Multiple Seasonality
@@ -69,9 +67,7 @@ const std::vector<float>& weights = res.weights;
 Specify multiple periods
 
 ```cpp
-using stl::MstlResult;
-
-MstlResult<float> res = stl::mstl_params().fit(series, {{7, 365}});
+stl::Mstl fit{series, {7, 365}};
 ```
 
 ## Parameters
@@ -79,29 +75,35 @@ MstlResult<float> res = stl::mstl_params().fit(series, {{7, 365}});
 Set STL parameters
 
 ```cpp
-stl::params()
-    .seasonal_length(7)     // length of the seasonal smoother
-    .trend_length(15)       // length of the trend smoother
-    .low_pass_length(7)     // length of the low-pass filter
-    .seasonal_degree(0)     // degree of locally-fitted polynomial in seasonal smoothing
-    .trend_degree(1)        // degree of locally-fitted polynomial in trend smoothing
-    .low_pass_degree(1)     // degree of locally-fitted polynomial in low-pass smoothing
-    .seasonal_jump(1)       // skipping value for seasonal smoothing
-    .trend_jump(2)          // skipping value for trend smoothing
-    .low_pass_jump(1)       // skipping value for low-pass smoothing
-    .inner_loops(2)         // number of loops for updating the seasonal and trend components
-    .outer_loops(0)         // number of iterations of robust fitting
-    .robust(false);         // if robustness iterations are to be used
+stl::StlParams params{
+    .seasonal_length = 7,     // length of the seasonal smoother
+    .trend_length = 15,       // length of the trend smoother
+    .low_pass_length = 7,     // length of the low-pass filter
+    .seasonal_degree = 0,     // degree of locally-fitted polynomial in seasonal smoothing
+    .trend_degree = 1,        // degree of locally-fitted polynomial in trend smoothing
+    .low_pass_degree = 1,     // degree of locally-fitted polynomial in low-pass smoothing
+    .seasonal_jump = 1,       // skipping value for seasonal smoothing
+    .trend_jump = 2,          // skipping value for trend smoothing
+    .low_pass_jump = 1,       // skipping value for low-pass smoothing
+    .inner_loops = 2,         // number of loops for updating the seasonal and trend components
+    .outer_loops = 0,         // number of iterations of robust fitting
+    .robust = false           // if robustness iterations are to be used
+};
+
+stl::Stl fit{series, period, params};
 ```
 
 Set MSTL parameters
 
 ```cpp
-stl::mstl_params()
-    .iterations(2)                  // number of iterations
-    .lambda(0.5)                    // lambda for Box-Cox transformation
-    .seasonal_lengths({11, 15})     // lengths of the seasonal smoothers
-    .stl_params(stl::params());     // STL params
+stl::MstlParams params{
+    .iterations = 2,                    // number of iterations
+    .lambda = 0.5,                      // lambda for Box-Cox transformation
+    .seasonal_lengths = {{11, 15}},     // lengths of the seasonal smoothers
+    .stl_params = {}                    // STL params
+};
+
+stl::Mstl fit{series, period, params};
 ```
 
 ## Strength
@@ -109,19 +111,19 @@ stl::mstl_params()
 Get the seasonal strength for STL
 
 ```cpp
-double strength = res.seasonal_strength();
+double strength = fit.seasonal_strength();
 ```
 
 Get the seasonal strength for MSTL
 
 ```cpp
-std::vector<double> strength = res.seasonal_strength();
+std::vector<double> strength = fit.seasonal_strength();
 ```
 
 Get the trend strength
 
 ```cpp
-double strength = res.trend_strength();
+double strength = fit.trend_strength();
 ```
 
 ## Credits
