@@ -26,18 +26,26 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+#include <version>
+
+#ifdef __cpp_lib_ranges_zip
+#include <ranges>
+#endif
 
 namespace stl {
 
 namespace detail {
 
-// TODO use span.at() for C++26
 template<typename T>
 T& span_at(std::span<T> sp, size_t pos) {
+#if __cpp_lib_span >= 202311L
+    return sp.at(pos);
+#else
     if (pos >= sp.size()) [[unlikely]] {
         throw std::out_of_range("pos >= size()");
     }
     return sp[pos];
+#endif
 }
 
 template<typename T>
@@ -265,10 +273,15 @@ void fts(
 
 template<typename T>
 void rwts(std::span<const T> y, const std::vector<T>& fit, std::vector<T>& rw) {
-    // TODO use std::views::zip for C++23
+#ifdef __cpp_lib_ranges_zip
+    for (auto&& [r, yi, f] : std::views::zip(rw, y, fit)) {
+        r = std::abs(yi - f);
+    }
+#else
     for (size_t i = 0; i < y.size(); i++) {
         rw.at(i) = std::abs(span_at(y, i) - fit.at(i));
     }
+#endif
 
     size_t n = y.size();
     size_t mid1 = (n - 1) / 2;
@@ -281,7 +294,18 @@ void rwts(std::span<const T> y, const std::vector<T>& fit, std::vector<T>& rw) {
     T c9 = static_cast<T>(0.999) * cmad;
     T c1 = static_cast<T>(0.001) * cmad;
 
-    // TODO use std::views::zip for C++23
+#ifdef __cpp_lib_ranges_zip
+    for (auto&& [ri, yi, f] : std::views::zip(rw, y, fit)) {
+        T r = std::abs(yi - f);
+        if (r <= c1) {
+            ri = 1.0;
+        } else if (r <= c9) {
+            ri = static_cast<T>(std::pow(1.0 - std::pow(r / cmad, 2.0), 2.0));
+        } else {
+            ri = 0.0;
+        }
+    }
+#else
     for (size_t i = 0; i < y.size(); i++) {
         T r = std::abs(span_at(y, i) - fit.at(i));
         if (r <= c1) {
@@ -292,6 +316,7 @@ void rwts(std::span<const T> y, const std::vector<T>& fit, std::vector<T>& rw) {
             rw.at(i) = 0.0;
         }
     }
+#endif
 }
 
 template<typename T>
@@ -369,22 +394,34 @@ void onestp(
     size_t n = y.size();
 
     for (size_t j = 0; j < ni; j++) {
-        // TODO use std::views::zip for C++23
+#ifdef __cpp_lib_ranges_zip
+        for (auto&& [w, yi, t] : std::views::zip(work1, y, trend)) {
+            w = yi - t;
+        }
+#else
         for (size_t i = 0; i < y.size(); i++) {
             work1.at(i) = span_at(y, i) - trend.at(i);
         }
+#endif
 
         ss(work1, n, np, ns, isdeg, nsjump, userw, rw, work2, work3, work4, work5, season);
         fts(work2, n + 2 * np, np, work3, work1);
         ess(work3, n, nl, ildeg, nljump, false, work4, std::span{work1}, work5);
-        // TODO use std::views::zip for C++23
+#ifdef __cpp_lib_ranges_zip
+        for (auto&& [s, w2, w1] : std::views::zip(season, std::span{work2}.subspan(np), work1)) {
+            s = w2 - w1;
+        }
+        for (auto&& [w1, yi, s] : std::views::zip(work1, y, season)) {
+            w1 = yi - s;
+        }
+#else
         for (size_t i = 0; i < n; i++) {
             season.at(i) = work2.at(np + i) - work1.at(i);
         }
-        // TODO use std::views::zip for C++23
         for (size_t i = 0; i < y.size(); i++) {
             work1.at(i) = span_at(y, i) - season.at(i);
         }
+#endif
         ess(work1, n, nt, itdeg, ntjump, userw, rw, std::span{trend}, work3);
     }
 }
@@ -667,10 +704,15 @@ Stl<T>::Stl(std::span<const T> series, size_t period, const StlParams& params) {
     );
 
     remainder.reserve(n);
-    // TODO use std::views::zip for C++23
+#ifdef __cpp_lib_ranges_zip
+    for (const auto& [yi, s, t] : std::views::zip(y, seasonal, trend)) {
+        remainder.push_back(yi - s - t);
+    }
+#else
     for (size_t i = 0; i < y.size(); i++) {
         remainder.push_back(detail::span_at(y, i) - seasonal.at(i) - trend.at(i));
     }
+#endif
 
     seasonal_ = std::move(seasonal);
     trend_ = std::move(trend);
