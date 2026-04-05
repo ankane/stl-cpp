@@ -800,6 +800,8 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
             seasonality.push_back(std::vector<T>());
         }
 
+        StlParams params = stl_params;
+
         for (size_t j = 0; j < iterate; j++) {
             for (size_t i = 0; i < indices.size(); i++) {
                 size_t idx = indices.at(i);
@@ -810,7 +812,6 @@ std::tuple<std::vector<T>, std::vector<T>, std::vector<std::vector<T>>> mstl(
                     }
                 }
 
-                StlParams params = stl_params;
                 if (swin) {
                     params.seasonal_length = swin.value().at(idx);
                 } else if (!stl_params.seasonal_length.has_value()) {
