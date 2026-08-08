@@ -103,7 +103,7 @@ stl::MstlParams params{
     .stl_params = {}                    // STL params
 };
 
-stl::Mstl fit{series, period, params};
+stl::Mstl fit{series, periods, params};
 ```
 
 ## Strength
